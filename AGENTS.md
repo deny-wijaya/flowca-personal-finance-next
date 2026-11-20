@@ -15,4 +15,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Only `src/shared/config/env.ts` reads `process.env`. Only `src/di/container.ts` picks concrete implementations (`DATA_SOURCE=mock|api`).
 - The backend API is called only from the server (Server Components and Server Actions). Never expose `API_BASE_URL` or tokens via `NEXT_PUBLIC_`.
 - Financial data is per-user: do not use `"use cache"` for it. Async data sections call `connection()` and are wrapped in `<Suspense>`.
+- UI follows `docs/PRD-UI-Flowca.md`: values only from `src/shared/ui/styles/tokens.css`, variants via `cva`, formatting in `presentation/view-models/`, screens are pure (no container/infrastructure imports). Design source lives in `design/*.dc.html`.
 - Before finishing: `npm run typecheck && npm run lint && npm test && npm run build`.

@@ -8,9 +8,11 @@ export const TRANSACTION_TYPES = ["income", "expense"] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
 export const TRANSACTION_CATEGORIES = {
-  income: ["Gaji", "Bonus", "Freelance", "Investasi", "Lainnya"],
-  expense: ["Makan & Minum", "Transportasi", "Tagihan", "Belanja", "Hiburan", "Kesehatan", "Lainnya"],
+  income: ["Gaji", "Freelance", "Bonus", "Hadiah", "Investasi", "Lainnya"],
+  expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"],
 } as const satisfies Record<TransactionType, readonly string[]>;
+
+export type TransactionCategory = (typeof TRANSACTION_CATEGORIES)[TransactionType][number];
 
 export type Transaction = {
   id: string;
@@ -18,7 +20,10 @@ export type Transaction = {
   /** Nominal dalam Rupiah, bilangan bulat positif (tanpa desimal). */
   amount: number;
   category: string;
+  /** Deskripsi singkat, mis. "Makan siang". Bila kosong, UI memakai nama kategori. */
   note?: string;
+  /** Akun sumber/tujuan uang (lihat modul account). Opsional untuk data lama dari API. */
+  accountId?: string;
   occurredAt: Date;
 };
 

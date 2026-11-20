@@ -11,6 +11,7 @@ export const transactionDtoSchema = z.object({
   amount: z.number().int(),
   category: z.string(),
   note: z.string().nullish(),
+  account_id: z.string().nullish(),
   occurred_at: z.iso.datetime({ offset: true }),
 });
 
@@ -25,6 +26,7 @@ export function toTransaction(dto: TransactionDto): Transaction {
     amount: dto.amount,
     category: dto.category,
     note: dto.note ?? undefined,
+    accountId: dto.account_id ?? undefined,
     occurredAt: new Date(dto.occurred_at),
   };
 }
@@ -35,6 +37,7 @@ export function toCreateTransactionBody(input: NewTransaction) {
     amount: input.amount,
     category: input.category,
     note: input.note ?? null,
+    account_id: input.accountId ?? null,
     occurred_at: input.occurredAt.toISOString(),
   };
 }

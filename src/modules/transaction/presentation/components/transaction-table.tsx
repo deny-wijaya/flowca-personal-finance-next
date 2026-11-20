@@ -1,0 +1,201 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/shared/lib/cn";
+import { CategoryTile, categoryPillVariants } from "@/shared/ui/primitives/category-tile";
+import { Checkbox } from "@/shared/ui/primitives/checkbox";
+import { Chip } from "@/shared/ui/primitives/chip";
+import { fieldVariants } from "@/shared/ui/primitives/field.variants";
+import { matchesFilter, TYPE_FILTERS, type TransactionRowVM, type TypeFilter } from "../view-models/transaction-view-model";
+import { Amount } from "./amount";
+import { SearchBox } from "./transactions-mobile";
+
+type SortKey = "date" | "amount";
+type SortDir = "asc" | "desc";
+
+type TransactionTableProps = {
+  rows: TransactionRowVM[];
+  categories: string[];
+  accounts: string[];
+  /** "November 2026" untuk footer tabel. */
+  monthLabel: string;
+};
+
+/** Tabel transaksi desktop: cari, filter jenis/kategori/akun, urut, dan pilih massal. */
+export function TransactionTable({ rows, categories, accounts, monthLabel }: TransactionTableProps) {
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState<TypeFilter>("all");
+  const [category, setCategory] = useState("");
+  const [account, setAccount] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "date", dir: "desc" });
+  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+
+  const shown = rows
+    .filter((row) => matchesFilter(row, { query, type }) && (!category || row.category === category) && (!account || row.account === account))
+    .sort((a, b) => {
+      const diff = sort.key === "date" ? a.sortTime - b.sortTime : a.sortAmount - b.sortAmount;
+      return sort.dir === "asc" ? diff : -diff;
+    });
+
+  const allSelected = shown.length > 0 && shown.every((row) => selected.has(row.id));
+  const selectedCount = rows.filter((row) => selected.has(row.id)).length;
+
+  function toggle(id: string) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setSelected((current) => {
+      const next = new Set(current);
+      for (const row of shown) {
+        if (allSelected) next.delete(row.id);
+        else next.add(row.id);
+      }
+      return next;
+    });
+  }
+
+  function sortBy(key: SortKey) {
+    setSort((current) => ({ key, dir: current.key === key && current.dir === "desc" ? "asc" : "desc" }));
+  }
+
+  const ariaSort = (key: SortKey) => (sort.key === key ? (sort.dir === "asc" ? "ascending" : "descending") : "none");
+  const arrow = (key: SortKey) => (sort.key === key ? (sort.dir === "asc" ? "▲" : "▼") : "↕");
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="max-w-90 min-w-65 flex-1">
+          <SearchBox id="dt-q" size={46} value={query} onChange={setQuery} placeholder="Cari transaksi" />
+        </div>
+        <div role="radiogroup" aria-label="Jenis" className="flex gap-1.5">
+          {TYPE_FILTERS.map((filter) => (
+            <Chip key={filter.id} behavior="radio" selected={type === filter.id} onClick={() => setType(filter.id)} className="min-h-10.5">
+              {filter.label}
+            </Chip>
+          ))}
+        </div>
+        <FilterSelect label="Kategori" value={category} onChange={setCategory} options={categories} />
+        <FilterSelect label="Akun" value={account} onChange={setAccount} options={accounts} />
+      </div>
+
+      {selectedCount > 0 && (
+        <div role="region" aria-label="Aksi untuk transaksi terpilih" className="flex flex-wrap items-center gap-3 rounded-xl bg-ink px-3.5 py-2.5 text-cream">
+          <span className="flex-1 text-14 font-bold">{selectedCount} transaksi dipilih</span>
+          {/* TODO(transaction): sambungkan ke use case ubah kategori/akun & hapus saat endpoint PATCH/DELETE tersedia (PRD fase A3). */}
+          <BulkButton>Ubah kategori</BulkButton>
+          <BulkButton>Pindah akun</BulkButton>
+          <button type="button" className="h-10 cursor-pointer rounded-md border-2 border-ink bg-coral px-3.5 font-body text-14 font-bold text-ink">
+            Hapus
+          </button>
+          <button type="button" onClick={() => setSelected(new Set())} className="h-10 cursor-pointer border-0 bg-transparent px-2.5 font-body text-14 font-semibold text-cream underline">
+            Batal
+          </button>
+        </div>
+      )}
+
+      <div className="overflow-x-auto rounded-2xl border-3 border-ink bg-paper shadow-hard-3">
+        <table className="w-full min-w-180 border-collapse text-14">
+          <thead>
+            <tr className="border-b-3 border-ink bg-orange-100 text-left">
+              <th scope="col" className="w-12 px-3.5 py-2.5">
+                <Checkbox boxSize={18} aria-label="Pilih semua" checked={allSelected} onChange={toggleAll} />
+              </th>
+              <th scope="col" aria-sort={ariaSort("date")} className="px-2">
+                <SortButton onClick={() => sortBy("date")} arrow={arrow("date")}>
+                  Tanggal
+                </SortButton>
+              </th>
+              <th scope="col" className="px-2 text-13">
+                Deskripsi
+              </th>
+              <th scope="col" className="px-2 text-13">
+                Kategori
+              </th>
+              <th scope="col" className="px-2 text-13">
+                Akun
+              </th>
+              <th scope="col" aria-sort={ariaSort("amount")} className="pr-3.5 pl-2">
+                <SortButton onClick={() => sortBy("amount")} arrow={arrow("amount")} className="ml-auto">
+                  Jumlah
+                </SortButton>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {shown.map((row) => {
+              const isSelected = selected.has(row.id);
+              return (
+                <tr key={row.id} className={cn("border-t-2 border-dashed border-sand-200 hover:bg-orange-50", isSelected ? "bg-orange-50" : "bg-paper")}>
+                  <td className="px-3.5 py-2.5">
+                    <Checkbox boxSize={18} aria-label={`Pilih ${row.name}`} checked={isSelected} onChange={() => toggle(row.id)} />
+                  </td>
+                  <td className="px-2 py-2.5 whitespace-nowrap">
+                    <div className="font-bold">{row.dayLabel}</div>
+                    <div className="text-12 text-ink-600">{row.time}</div>
+                  </td>
+                  <td className="px-2 py-2.5 font-bold">{row.name}</td>
+                  <td className="px-2 py-2.5">
+                    <CategoryPill row={row} />
+                  </td>
+                  <td className="px-2 py-2.5">{row.account}</td>
+                  <td className="py-2.5 pr-3.5 pl-2 text-right">
+                    <Amount value={row.amount} direction={row.direction} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {shown.length === 0 && <div className="p-8 text-center text-15 text-ink-600">Tidak ada transaksi yang cocok dengan filter ini.</div>}
+        <div className="border-t-3 border-ink px-4 py-3 text-13 text-ink-600">
+          Menampilkan {shown.length} dari {rows.length} transaksi · {monthLabel}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function CategoryPill({ row }: { row: TransactionRowVM }) {
+  return (
+    <span className={categoryPillVariants({ tone: row.tone })}>
+      <CategoryTile initial={row.initial} tone="paper" size={18} />
+      {row.category}
+    </span>
+  );
+}
+
+function SortButton({ onClick, arrow, className, children }: { onClick: () => void; arrow: string; className?: string; children: string }) {
+  return (
+    <button type="button" onClick={onClick} className={cn("flex h-11 cursor-pointer items-center gap-1 border-0 bg-transparent font-body text-13 font-bold text-ink", className)}>
+      {children} <span aria-hidden="true">{arrow}</span>
+    </button>
+  );
+}
+
+function BulkButton({ children }: { children: string }) {
+  return (
+    <button type="button" className="h-10 cursor-pointer rounded-md border-2 border-cream bg-transparent px-3.5 font-body text-14 font-bold text-cream">
+      {children}
+    </button>
+  );
+}
+
+function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
+  return (
+    <label className="flex items-center gap-2 text-13 font-bold">
+      {label}
+      <select value={value} onChange={(event) => onChange(event.target.value)} className={fieldVariants({ size: 42, className: "w-auto px-2.5" })}>
+        <option value="">Semua</option>
+        {options.map((option) => (
+          <option key={option}>{option}</option>
+        ))}
+      </select>
+    </label>
+  );
+}

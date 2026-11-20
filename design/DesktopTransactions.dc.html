@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Flowca — Transaksi (desktop)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F1B2D}a:hover{color:#C2321F}
+.btn{transition:transform .08s ease, box-shadow .08s ease;cursor:pointer}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #1F1B2D !important}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #1F1B2D !important}
+.btn[disabled]{cursor:progress}
+.nv:hover{background:#FFE7C2 !important}
+.row:hover{background:#FFF0D9 !important}
+.chip{cursor:pointer}
+.fld:focus{outline:none;border-color:#1F1B2D !important;box-shadow:0 0 0 3px #5BC8D6 !important}
+:focus-visible{outline:3px solid #2A8FA0;outline-offset:2px}
+input::placeholder{color:#7A7287}
+.num{font-variant-numeric:tabular-nums}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .9s steps(8) infinite}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 900px; background: #FFF6E5; color: #1F1B2D; font-family: 'Space Grotesk', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+<aside style="flex: 1 1 248px; max-width: 280px; background: #FFFDF8; border-right: 3px solid #1F1B2D; padding: 22px 16px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 4px">
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 42px; height: 37px; display: block; flex: none"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<div style="font-family: 'Pixelify Sans', monospace; font-size: 28px; font-weight: 700; line-height: 1">Flowca</div>
+</div>
+<button type="button" onClick="{{ togglePanel }}" aria-expanded="{{ panelOpen }}" aria-controls="quick-panel" class="btn" style="height: 56px; width: 100%; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFA94D; box-shadow: 4px 4px 0 #1F1B2D; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-family: inherit; font-size: 16px; font-weight: 700; color: #1F1B2D; position: relative">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+<span style="flex: 1; text-align: left">Catat cepat</span>
+<span style="border: 2px solid #1F1B2D; border-radius: 4px; background: #FF9EC7; padding: 0 5px; font-family: 'Pixelify Sans', monospace; font-size: 12px; line-height: 18px">AI</span>
+<kbd style="border: 2px solid #1F1B2D; border-radius: 4px; background: #FFFDF8; padding: 0 6px; font-family: inherit; font-size: 12px; line-height: 18px">N</kbd>
+</button>
+<nav aria-label="Navigasi utama"><ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+<li><a href="DesktopHome.dc.html" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Beranda</span></a></li>
+<li><a href="DesktopTransactions.dc.html" aria-current="page" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid #1F1B2D; background: #FF7A6B; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/></svg><span>Transaksi</span></a></li>
+<li><a href="#budget" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg><span>Anggaran</span></a></li>
+<li><a href="#insights" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-7M2 20h20"/></svg><span>Insight</span></a></li>
+<li><a href="#accounts" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 11h5v4h-5z"/></svg><span>Akun</span></a></li>
+<li><a href="#settings" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Pengaturan</span></a></li>
+</ul></nav>
+<a href="ProfileMenu.dc.html" class="nv" style="margin-top: auto; border: 3px solid #1F1B2D; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1F1B2D; background: #FFFDF8">
+<span aria-hidden="true" style="width: 40px; height: 40px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FF9EC7; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 16px; font-weight: 700; flex: none">RP</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 700">Rani Putri</span><span style="font-size: 12px; color: #4A4458; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rani.putri@gmail.com</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+</a>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px">
+<div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap">
+<h1 style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 36px; font-weight: 700">Transaksi</h1>
+<div style="display: flex; align-items: center; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D">
+<button type="button" aria-label="Bulan sebelumnya" style="width: 44px; height: 42px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<span style="font-size: 14px; font-weight: 700">November 2026</span>
+<button type="button" aria-label="Bulan berikutnya" style="width: 44px; height: 42px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</div>
+</div>
+<div style="display: flex; gap: 12px; flex-wrap: wrap">
+<button type="button" class="btn" style="height: 46px; padding: 0 16px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; gap: 8px; font-family: inherit; font-size: 14px; font-weight: 700; color: #1F1B2D"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><path d="M12 3v12M6 10l6 6 6-6M4 21h16"/></svg><span>Ekspor CSV</span></button>
+<a href="AddTransaction.dc.html" class="btn" style="height: 46px; padding: 0 16px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg><span>Form manual</span></a>
+</div>
+</div>
+<section aria-label="Ringkasan bulan ini" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700; color: #4A4458">MASUK</span><span class="num" style="font-size: 22px; font-weight: 700; color: #1E6B40">{{ totalIn }}</span></div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700; color: #4A4458">KELUAR</span><span class="num" style="font-size: 22px; font-weight: 700; color: #B42318">{{ totalOut }}</span></div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 700; color: #4A4458">SELISIH</span><span class="num" style="font-size: 22px; font-weight: 700">{{ net }}</span></div>
+</section>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+<div style="position: relative; flex: 1 1 260px; max-width: 360px">
+<span style="position: absolute; left: 14px; top: 14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A4458" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="M15 15l5 5"/></svg></span>
+<label for="dt-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Cari transaksi</label>
+<input id="dt-q" class="fld" type="search" placeholder="Cari transaksi" value="{{ q }}" onChange="{{ onQ }}" style="height: 46px; width: 100%; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 12px 0 42px; font-family: inherit; font-size: 15px; color: #1F1B2D">
+</div>
+<div role="radiogroup" aria-label="Jenis" style="display: flex; gap: 6px">
+<sc-for list="{{ types }}" as="f" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ f.on }}" onClick="{{ f.pick }}" class="chip" style="min-height: 42px; padding: 0 14px; border: 2px solid #1F1B2D; border-radius: 999px; background: {{ f.bg }}; color: {{ f.fg }}; font-family: inherit; font-size: 14px; font-weight: 700">{{ f.label }}</button>
+</sc-for>
+</div>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700">Kategori
+<select value="{{ cat }}" onChange="{{ onCat }}" class="fld" style="height: 42px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 10px; font-family: inherit; font-size: 14px; color: #1F1B2D">
+<option value="">Semua</option><option>Makanan</option><option>Transportasi</option><option>Tagihan</option><option>Belanja</option><option>Gaji</option><option>Freelance</option>
+</select></label>
+<label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700">Akun
+<select value="{{ acct }}" onChange="{{ onAcct }}" class="fld" style="height: 42px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 10px; font-family: inherit; font-size: 14px; color: #1F1B2D">
+<option value="">Semua</option><option>Tunai</option><option>Rekening bank</option>
+</select></label>
+</div>
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+<div role="region" aria-label="Aksi untuk transaksi terpilih" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: #1F1B2D; color: #FFF6E5; border-radius: 12px; padding: 10px 14px">
+<span style="font-size: 14px; font-weight: 700; flex: 1">{{ selLabel }}</span>
+<button type="button" style="height: 40px; padding: 0 14px; border: 2px solid #FFF6E5; border-radius: 8px; background: transparent; color: #FFF6E5; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Ubah kategori</button>
+<button type="button" style="height: 40px; padding: 0 14px; border: 2px solid #FFF6E5; border-radius: 8px; background: transparent; color: #FFF6E5; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Pindah akun</button>
+<button type="button" style="height: 40px; padding: 0 14px; border: 2px solid #1F1B2D; border-radius: 8px; background: #FF7A6B; color: #1F1B2D; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">Hapus</button>
+<button type="button" onClick="{{ clearSel }}" style="height: 40px; padding: 0 10px; border: none; background: transparent; color: #FFF6E5; font-family: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; cursor: pointer">Batal</button>
+</div>
+</sc-if>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; overflow-x: auto">
+<table style="width: 100%; min-width: 720px; border-collapse: collapse; font-size: 14px">
+<thead>
+<tr style="background: #FFE7C2; border-bottom: 3px solid #1F1B2D; text-align: left">
+<th scope="col" style="width: 48px; padding: 10px 14px"><input type="checkbox" aria-label="Pilih semua" checked="{{ allSel }}" onChange="{{ toggleAll }}" style="width: 18px; height: 18px; accent-color: #1F1B2D; margin: 0"></th>
+<th scope="col" aria-sort="{{ sortDate }}" style="padding: 0 8px"><button type="button" onClick="{{ byDate }}" style="height: 44px; border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 700; color: #1F1B2D; cursor: pointer; display: flex; align-items: center; gap: 4px">Tanggal <span aria-hidden="true">{{ dateArrow }}</span></button></th>
+<th scope="col" style="padding: 0 8px; font-size: 13px">Deskripsi</th>
+<th scope="col" style="padding: 0 8px; font-size: 13px">Kategori</th>
+<th scope="col" style="padding: 0 8px; font-size: 13px">Akun</th>
+<th scope="col" aria-sort="{{ sortAmt }}" style="padding: 0 14px 0 8px"><button type="button" onClick="{{ byAmt }}" style="height: 44px; margin-left: auto; border: none; background: transparent; font-family: inherit; font-size: 13px; font-weight: 700; color: #1F1B2D; cursor: pointer; display: flex; align-items: center; gap: 4px">Jumlah <span aria-hidden="true">{{ amtArrow }}</span></button></th>
+</tr>
+</thead>
+<tbody>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+<tr class="row" style="border-top: 2px dashed #E3DACB; background: {{ r.bg }}">
+<td style="padding: 10px 14px"><input type="checkbox" aria-label="{{ r.selLabel }}" checked="{{ r.sel }}" onChange="{{ r.toggle }}" style="width: 18px; height: 18px; accent-color: #1F1B2D; margin: 0"></td>
+<td style="padding: 10px 8px; white-space: nowrap"><div style="font-weight: 700">{{ r.date }}</div><div style="font-size: 12px; color: #4A4458">{{ r.time }}</div></td>
+<td style="padding: 10px 8px; font-weight: 700">{{ r.name }}</td>
+<td style="padding: 10px 8px"><span style="display: inline-flex; align-items: center; gap: 6px; border: 2px solid #1F1B2D; border-radius: 999px; padding: 2px 10px 2px 4px; background: {{ r.tile }}; font-size: 13px; font-weight: 700"><span aria-hidden="true" style="width: 18px; height: 18px; border: 2px solid #1F1B2D; border-radius: 4px; background: #FFFDF8; display: inline-flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 11px">{{ r.initial }}</span>{{ r.cat }}</span></td>
+<td style="padding: 10px 8px">{{ r.acct }}</td>
+<td class="num" style="padding: 10px 14px 10px 8px; text-align: right; font-weight: 700; color: {{ r.color }}; white-space: nowrap">{{ r.amount }}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 32px; text-align: center; font-size: 15px; color: #4A4458">Tidak ada transaksi yang cocok dengan filter ini.</div>
+</sc-if>
+<div style="padding: 12px 16px; border-top: 3px solid #1F1B2D; font-size: 13px; color: #4A4458">{{ footer }}</div>
+</div>
+</main>
+<sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+<aside id="quick-panel" aria-label="Catat cepat" style="flex: 1 1 340px; max-width: 400px; border-left: 3px solid #1F1B2D; background: #FFFDF8; display: flex; flex-direction: column; min-height: 860px">
+<div style="padding: 14px 16px; border-bottom: 3px solid #1F1B2D; display: flex; align-items: center; gap: 10px; background: #FFE7C2">
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 36px; height: 32px; display: block; flex: none"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 1px"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Catat cepat</h2><span style="font-size: 12px; color: #4A4458">Koko · simulasi, belum terhubung ke AI</span></div>
+<button type="button" onClick="{{ togglePanel }}" aria-label="Tutup panel catat cepat" style="width: 40px; height: 40px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+</div>
+<div role="log" aria-label="Percakapan dengan Koko" style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto">
+<div style="align-self: flex-start; max-width: 88%; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px 14px 14px 4px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 14px; line-height: 1.45">Hai Rani! Ketik, bicara, atau seret foto nota ke sini. Aku isi detailnya, kamu tinggal cek.</div>
+<div style="align-self: flex-end; max-width: 80%; background: #5BC8D6; border: 3px solid #1F1B2D; border-radius: 14px 14px 4px 14px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 14px">kopi 22rb, ojek 18rb pakai bank</div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 4px 4px 0 #1F1B2D; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: {{ draftHead }}; border-bottom: 3px solid #1F1B2D; font-size: 12px; font-weight: 700"><span>{{ draftLabel }}</span><span style="border: 2px solid #1F1B2D; border-radius: 4px; padding: 0 6px; background: #FFFFFF; font-size: 11px">diisi AI</span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px"><span aria-hidden="true" style="width: 34px; height: 34px; border: 2px solid #1F1B2D; border-radius: 8px; background: #FFE7C2; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-weight: 700; flex: none">M</span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 700">Kopi</span><span style="font-size: 12px; color: #4A4458">Makanan · Rekening bank · Hari ini</span></span><span class="num" style="font-size: 14px; font-weight: 700; color: #B42318">−Rp 22.000</span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 2px dashed #E3DACB"><span aria-hidden="true" style="width: 34px; height: 34px; border: 2px solid #1F1B2D; border-radius: 8px; background: #D8F3F7; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-weight: 700; flex: none">T</span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 700">Ojek</span><span style="font-size: 12px; color: #4A4458">Transportasi · Rekening bank · Hari ini</span></span><span class="num" style="font-size: 14px; font-weight: 700; color: #B42318">−Rp 18.000</span></div>
+<sc-if value="{{ draftPending }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 2px dashed #E3DACB">
+<button type="button" onClick="{{ saveDraft }}" class="btn" style="flex: 1; height: 42px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; font-family: inherit; font-size: 14px; font-weight: 700; color: #1F1B2D">Simpan semua</button>
+<a href="AddTransaction.dc.html" class="btn" style="height: 42px; padding: 0 14px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; font-size: 14px; font-weight: 700; text-decoration: none; color: #1F1B2D">Ubah</a>
+</div>
+</sc-if>
+<sc-if value="{{ draftSaved }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="padding: 10px 12px; border-top: 2px dashed #E3DACB; font-size: 13px; font-weight: 700; color: #1E6B40">Tersimpan ke riwayat</div>
+</sc-if>
+</div>
+</div>
+<div style="padding: 0 16px 12px">
+<button type="button" class="chip" style="width: 100%; min-height: 64px; border: 3px dashed #1F1B2D; border-radius: 12px; background: #FFF6E5; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: inherit; font-size: 14px; font-weight: 600; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Seret foto nota ke sini, atau klik untuk pilih</span></button>
+</div>
+<form onSubmit="{{ noop }}" style="margin: 0; padding: 12px 16px 16px; border-top: 3px solid #1F1B2D; display: flex; gap: 8px; align-items: center">
+<label for="qp-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ketik transaksi</label>
+<input id="qp-input" class="fld" type="text" autoComplete="off" placeholder="Contoh: bensin 30rb tunai" style="flex: 1; min-width: 0; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1F1B2D">
+<button type="button" aria-label="Bicara untuk mencatat" class="btn" style="width: 48px; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FF7A6B; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+<button type="submit" aria-label="Kirim" class="btn" style="width: 48px; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.8" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+</form>
+<div style="padding: 0 16px 14px; font-size: 12px; color: #4A4458">Enter untuk kirim · Esc untuk tutup panel</div>
+</aside>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"panelOpenAtStart":{"editor":"boolean","default":false,"section":"Simulasi"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { panelOpen: props.panelOpenAtStart ?? false, draftSaved: false, q: '', type: 'all', cat: '', acct: '', sel: {}, sortKey: 'date', dir: 'desc' };
+  }
+  componentDidUpdate(prev) { if (prev.panelOpenAtStart !== this.props.panelOpenAtStart) this.setState({ panelOpen: this.props.panelOpenAtStart ?? false }); }
+  renderVals() {
+    var self = this, s = this.state;
+    var all = [
+      { d: 19, date: 'Kam, 19 Nov', time: '12.30', name: 'Makan siang', cat: 'Makanan', acct: 'Tunai', amt: -25000 },
+      { d: 19, date: 'Kam, 19 Nov', time: '08.10', name: 'Kopi susu', cat: 'Makanan', acct: 'Rekening bank', amt: -22000 },
+      { d: 18, date: 'Rab, 18 Nov', time: '19.20', name: 'Token listrik', cat: 'Tagihan', acct: 'Rekening bank', amt: -150000 },
+      { d: 18, date: 'Rab, 18 Nov', time: '07.45', name: 'Ojek ke kantor', cat: 'Transportasi', acct: 'Rekening bank', amt: -18000 },
+      { d: 15, date: 'Min, 15 Nov', time: '16.00', name: 'Proyek desain logo', cat: 'Freelance', acct: 'Rekening bank', amt: 1200000 },
+      { d: 14, date: 'Sab, 14 Nov', time: '10.15', name: 'Belanja bulanan', cat: 'Belanja', acct: 'Rekening bank', amt: -432500 },
+      { d: 1, date: 'Min, 1 Nov', time: '09.00', name: 'Gaji November', cat: 'Gaji', acct: 'Rekening bank', amt: 6500000 }
+    ];
+    var tiles = { Makanan: '#FFE7C2', Transportasi: '#D8F3F7', Tagihan: '#FFD9E8', Belanja: '#FFD3CC', Gaji: '#C9EFD7', Freelance: '#C9EFD7' };
+    function rp(n) { return 'Rp ' + Math.abs(n).toLocaleString('id-ID'); }
+    function signed(n) { return (n < 0 ? '−' : '+') + rp(n); }
+    all.forEach(function (t, i) { t.id = i; });
+    var q = (s.q || '').toLowerCase();
+    var shown = all.filter(function (t) {
+      if (s.type === 'out' && t.amt > 0) return false;
+      if (s.type === 'in' && t.amt < 0) return false;
+      if (s.cat && t.cat !== s.cat) return false;
+      if (s.acct && t.acct !== s.acct) return false;
+      return !q || (t.name + ' ' + t.cat).toLowerCase().indexOf(q) !== -1;
+    });
+    shown.sort(function (a, b) {
+      var va = s.sortKey === 'date' ? a.d * 10000 + parseInt(a.time.replace('.', ''), 10) : a.amt;
+      var vb = s.sortKey === 'date' ? b.d * 10000 + parseInt(b.time.replace('.', ''), 10) : b.amt;
+      return s.dir === 'asc' ? va - vb : vb - va;
+    });
+    var inSum = 0, outSum = 0;
+    all.forEach(function (t) { if (t.amt > 0) inSum += t.amt; else outSum -= t.amt; });
+    var selCount = Object.keys(s.sel).filter(function (k) { return s.sel[k]; }).length;
+    var allSel = shown.length > 0 && shown.every(function (t) { return s.sel[t.id]; });
+    function sortBy(key) { return function () { self.setState({ sortKey: key, dir: self.state.sortKey === key && self.state.dir === 'desc' ? 'asc' : 'desc' }); }; }
+    var defs = [{ id: 'all', label: 'Semua' }, { id: 'out', label: 'Pengeluaran' }, { id: 'in', label: 'Pemasukan' }];
+    return {
+      panelOpen: s.panelOpen,
+      togglePanel: function () { self.setState({ panelOpen: !self.state.panelOpen }); },
+      draftPending: !s.draftSaved, draftSaved: s.draftSaved,
+      draftLabel: s.draftSaved ? 'Tersimpan' : 'Draf · 2 transaksi · total −Rp 40.000',
+      draftHead: s.draftSaved ? '#C9EFD7' : '#FFE7C2',
+      saveDraft: function () { self.setState({ draftSaved: true }); },
+      noop: function (ev) { if (ev && ev.preventDefault) ev.preventDefault(); },
+      totalIn: rp(inSum), totalOut: rp(outSum), net: rp(inSum - outSum),
+      q: s.q, cat: s.cat, acct: s.acct,
+      onQ: function (ev) { self.setState({ q: ev.target.value }); },
+      onCat: function (ev) { self.setState({ cat: ev.target.value }); },
+      onAcct: function (ev) { self.setState({ acct: ev.target.value }); },
+      types: defs.map(function (f) { var on = s.type === f.id; return { label: f.label, on: on, bg: on ? '#1F1B2D' : '#FFFDF8', fg: on ? '#FFF6E5' : '#1F1B2D', pick: function () { self.setState({ type: f.id }); } }; }),
+      rows: shown.map(function (t) {
+        var on = !!s.sel[t.id];
+        return { date: t.date, time: t.time, name: t.name, cat: t.cat, initial: t.cat.charAt(0), tile: tiles[t.cat], acct: t.acct,
+          amount: signed(t.amt), color: t.amt < 0 ? '#B42318' : '#1E6B40', sel: on, bg: on ? '#FFF0D9' : '#FFFDF8', selLabel: 'Pilih ' + t.name,
+          toggle: function () { var n = Object.assign({}, self.state.sel); n[t.id] = !n[t.id]; self.setState({ sel: n }); } };
+      }),
+      isEmpty: shown.length === 0,
+      allSel: allSel,
+      toggleAll: function () { var n = Object.assign({}, self.state.sel); shown.forEach(function (t) { n[t.id] = !allSel; }); self.setState({ sel: n }); },
+      hasSel: selCount > 0, selLabel: selCount + ' transaksi dipilih',
+      clearSel: function () { self.setState({ sel: {} }); },
+      sortDate: s.sortKey === 'date' ? (s.dir === 'asc' ? 'ascending' : 'descending') : 'none',
+      sortAmt: s.sortKey === 'amt' ? (s.dir === 'asc' ? 'ascending' : 'descending') : 'none',
+      dateArrow: s.sortKey === 'date' ? (s.dir === 'asc' ? '▲' : '▼') : '↕',
+      amtArrow: s.sortKey === 'amt' ? (s.dir === 'asc' ? '▲' : '▼') : '↕',
+      byDate: sortBy('date'), byAmt: sortBy('amt'),
+      footer: 'Menampilkan ' + shown.length + ' dari ' + all.length + ' transaksi · November 2026'
+    };
+  }
+}
+</script>
+</body>
+</html>

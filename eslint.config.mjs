@@ -42,12 +42,45 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["src/app/**", "src/modules/*/presentation/components/**"],
+    files: ["src/app/**"],
     rules: {
       "no-restricted-imports": forbid(
         [["**/infrastructure/**", "@/shared/config/*"]],
         "UI tidak boleh memanggil infrastructure atau membaca env langsung. Pakai use case lewat @/di/container.",
       ),
+    },
+  },
+  {
+    // Screen, komponen, dan mapper view model harus murni: tidak ada akses data atau env.
+    files: [
+      "src/modules/*/presentation/components/**",
+      "src/modules/*/presentation/screens/**",
+      "src/modules/*/presentation/view-models/**",
+      "src/shared/ui/**",
+    ],
+    ignores: ["**/*.test.ts"],
+    rules: {
+      "no-restricted-imports": forbid(
+        [["**/infrastructure/**", "@/shared/config/*", "@/di/*", "**/application/*-use-cases", "**/application/create-*", "**/application/list-*"]],
+        "Screen & komponen hanya menerima view model lewat props. Panggil use case di page.tsx atau Server Action.",
+      ),
+    },
+  },
+  {
+    // Nilai visual hanya dari token (tokens.css). Tolak hex dan nilai arbitrer px di class Tailwind.
+    files: ["src/modules/*/presentation/**/*.{ts,tsx}", "src/shared/ui/**/*.{ts,tsx}", "src/app/**/*.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='className'] Literal[value=/#[0-9a-fA-F]{3,8}|\\[[^\\]]*\\d+px[^\\]]*\\]/]",
+          message: "Jangan menulis hex atau nilai arbitrer px di className. Pakai utility dari token (lihat tokens.css).",
+        },
+        {
+          selector: "CallExpression[callee.name=/^(cva|cn)$/] Literal[value=/#[0-9a-fA-F]{3,8}|\\[[^\\]]*\\d+px[^\\]]*\\]/]",
+          message: "Jangan menulis hex atau nilai arbitrer px di varian. Pakai utility dari token (lihat tokens.css).",
+        },
+      ],
     },
   },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),

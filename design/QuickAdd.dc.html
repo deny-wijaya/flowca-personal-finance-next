@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Flowca — Quick Add dengan AI</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F1B2D}a:hover{color:#C2321F}
+.btn{transition:transform .08s ease, box-shadow .08s ease;cursor:pointer}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #1F1B2D !important}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #1F1B2D !important}
+.ibtn{cursor:pointer}
+.ibtn:hover{background:#FFE7C2 !important}
+.chip{cursor:pointer}
+.chip:hover{background:#FFE7C2 !important}
+.fld:focus{outline:none;box-shadow:0 0 0 3px #5BC8D6 !important}
+:focus-visible{outline:3px solid #2A8FA0;outline-offset:2px}
+input::placeholder{color:#7A7287}
+.chips::-webkit-scrollbar{display:none}
+@keyframes wave{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.bar{animation:wave .9s steps(4) infinite;transform-origin:center}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.dot{animation:blink 1s steps(2) infinite}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #FFF6E5; color: #1F1B2D; font-family: 'Space Grotesk', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden">
+<div style="background: #1F1B2D; color: #FFF6E5; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; padding: 7px 16px; display: flex; align-items: center; gap: 8px">
+<span style="width: 8px; height: 8px; background: #FFA94D; display: inline-block"></span>
+<span>SIMULASI · AI, suara & baca nota belum terhubung</span>
+</div>
+<header style="padding: 10px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 3px solid #1F1B2D; background: #FFFDF8">
+<a href="ProfileMenu.dc.html" aria-label="Kembali ke beranda" style="width: 44px; height: 44px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+</a>
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 40px; height: 35px; display: block; flex: none"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+<h1 style="margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 19px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em">Catat cepat</h1>
+<div style="font-size: 12px; color: #4A4458">Koko · asisten pencatat</div>
+</div>
+<a href="AddTransaction.dc.html" style="min-height: 44px; padding: 0 10px; border: 2px solid #1F1B2D; border-radius: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; text-decoration: none; color: #1F1B2D; flex: none">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><path d="M4 20h4L20 8l-4-4L4 16z"/></svg>
+<span>Form</span>
+</a>
+</header>
+<div role="log" aria-live="polite" aria-label="Percakapan dengan Koko" style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px; display: flex; flex-direction: column-reverse; gap: 12px">
+<sc-for list="{{ msgs }}" as="m" hint-placeholder-count="3">
+<sc-if value="{{ m.isUserText }}" hint-placeholder-val="{{ false }}">
+<div style="align-self: flex-end; max-width: 80%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+<div style="background: #5BC8D6; border: 3px solid #1F1B2D; border-radius: 14px 14px 4px 14px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 15px; line-height: 1.4">{{ m.text }}</div>
+<sc-if value="{{ m.voice }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; color: #4A4458"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4A4458" stroke-width="3" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>via suara</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ m.isUserPhoto }}" hint-placeholder-val="{{ false }}">
+<div style="align-self: flex-end; display: flex; flex-direction: column; align-items: flex-end; gap: 4px">
+<div style="background: #5BC8D6; border: 3px solid #1F1B2D; border-radius: 14px 14px 4px 14px; box-shadow: 3px 3px 0 #1F1B2D; padding: 8px">
+<svg viewBox="0 0 20 26" shape-rendering="crispEdges" role="img" aria-label="Foto nota belanja (contoh)" style="width: 120px; height: 156px; display: block; background: #E9E2D3">
+<rect x="3" y="1" width="14" height="23" fill="#FFFFFF"/><rect x="3" y="24" width="2" height="1" fill="#FFFFFF"/><rect x="7" y="24" width="2" height="1" fill="#FFFFFF"/><rect x="11" y="24" width="2" height="1" fill="#FFFFFF"/><rect x="15" y="24" width="2" height="1" fill="#FFFFFF"/>
+<rect x="6" y="3" width="8" height="1" fill="#1F1B2D"/><rect x="5" y="6" width="6" height="1" fill="#8E8798"/><rect x="13" y="6" width="2" height="1" fill="#8E8798"/><rect x="5" y="8" width="5" height="1" fill="#8E8798"/><rect x="13" y="8" width="2" height="1" fill="#8E8798"/><rect x="5" y="10" width="7" height="1" fill="#8E8798"/><rect x="13" y="10" width="2" height="1" fill="#8E8798"/>
+<rect x="5" y="13" width="10" height="1" fill="#1F1B2D"/><rect x="5" y="15" width="4" height="1" fill="#1F1B2D"/><rect x="11" y="15" width="4" height="1" fill="#1F1B2D"/><rect x="6" y="19" width="8" height="2" fill="#C9C1B4"/>
+</svg>
+</div>
+<div style="font-size: 11px; font-weight: 700; color: #4A4458">nota.jpg · foto</div>
+</div>
+</sc-if>
+<sc-if value="{{ m.isAiText }}" hint-placeholder-val="{{ true }}">
+<div style="align-self: flex-start; max-width: 85%; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px 14px 14px 4px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 15px; line-height: 1.45">{{ m.text }}</div>
+</sc-if>
+<sc-if value="{{ m.isTyping }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="align-self: flex-start; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px 14px 14px 4px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4A4458">
+<span aria-hidden="true" style="display: flex; gap: 4px"><span class="dot" style="width: 6px; height: 6px; background: #1F1B2D"></span><span class="dot" style="width: 6px; height: 6px; background: #1F1B2D; animation-delay: .2s"></span><span class="dot" style="width: 6px; height: 6px; background: #1F1B2D; animation-delay: .4s"></span></span>
+<span>{{ m.text }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ m.isDraft }}" hint-placeholder-val="{{ false }}">
+<div style="align-self: flex-start; width: 92%; display: flex; flex-direction: column; gap: 8px">
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px 14px 14px 4px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 15px; line-height: 1.45">{{ m.text }}</div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 4px 4px 0 #1F1B2D; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; background: {{ m.headBg }}; border-bottom: 3px solid #1F1B2D; font-size: 12px; font-weight: 700">
+<span>{{ m.headLabel }}</span>
+<span style="border: 2px solid #1F1B2D; border-radius: 4px; padding: 1px 6px; background: #FFFFFF; font-size: 11px">diisi AI</span>
+</div>
+<sc-for list="{{ m.items }}" as="it" hint-placeholder-count="1">
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: {{ it.divider }}">
+<span aria-hidden="true" style="width: 38px; height: 38px; border: 2px solid #1F1B2D; border-radius: 8px; background: {{ it.tile }}; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 16px; font-weight: 700; flex: none">{{ it.initial }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ it.name }}</span>
+<span style="font-size: 12px; color: #4A4458">{{ it.meta }}</span>
+</span>
+<span style="font-size: 14px; font-weight: 700; color: {{ it.color }}; white-space: nowrap; font-variant-numeric: tabular-nums">{{ it.amount }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ m.hasNote }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 8px 12px; border-top: 2px dashed #E3DACB; font-size: 12px; color: #4A4458">{{ m.note }}</div>
+</sc-if>
+<sc-if value="{{ m.notSaved }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 2px dashed #E3DACB">
+<button type="button" onClick="{{ m.save }}" class="btn" style="flex: 1; height: 44px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; font-family: inherit; font-size: 14px; font-weight: 700; color: #1F1B2D">{{ m.saveLabel }}</button>
+<a href="AddTransaction.dc.html" class="btn" style="height: 44px; padding: 0 14px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; font-size: 14px; font-weight: 700; text-decoration: none; color: #1F1B2D">Ubah</a>
+</div>
+</sc-if>
+<sc-if value="{{ m.saved }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 2px dashed #E3DACB; font-size: 13px; font-weight: 700; color: #1E6B40">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E6B40" stroke-width="3.4" stroke-linecap="square" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>
+<span>Tersimpan ke riwayat</span>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</sc-for>
+</div>
+<sc-if value="{{ notListening }}" hint-placeholder-val="{{ true }}">
+<div class="chips" style="display: flex; gap: 8px; overflow-x: auto; padding: 8px 16px; scrollbar-width: none">
+<button type="button" onClick="{{ tryPhoto }}" class="chip" style="flex: none; min-height: 40px; padding: 0 12px; border: 2px solid #1F1B2D; border-radius: 999px; background: #FFFDF8; display: flex; align-items: center; gap: 6px; font-family: inherit; font-size: 13px; font-weight: 700; color: #1F1B2D">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.8" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg>Foto nota
+</button>
+<sc-for list="{{ suggestions }}" as="sg" hint-placeholder-count="3">
+<button type="button" onClick="{{ sg.use }}" class="chip" style="flex: none; min-height: 40px; padding: 0 12px; border: 2px solid #1F1B2D; border-radius: 999px; background: #FFFDF8; font-family: inherit; font-size: 13px; font-weight: 600; color: #1F1B2D">{{ sg.label }}</button>
+</sc-for>
+</div>
+<form onSubmit="{{ submit }}" style="margin: 0; padding: 8px 16px 18px; display: flex; align-items: center; gap: 8px; border-top: 3px solid #1F1B2D; background: #FFFDF8">
+<button type="button" onClick="{{ tryPhoto }}" aria-label="Foto atau unggah nota" class="ibtn" style="width: 48px; height: 48px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg>
+</button>
+<label for="qa-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ketik transaksi</label>
+<input id="qa-input" class="fld" type="text" autoComplete="off" placeholder="Contoh: bensin 30rb tunai" value="{{ input }}" onChange="{{ onInput }}" style="flex: 1; min-width: 0; height: 48px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 16px; color: #1F1B2D">
+<sc-if value="{{ hasInput }}" hint-placeholder-val="{{ false }}">
+<button type="submit" aria-label="Kirim" class="btn" style="width: 52px; height: 48px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.8" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+</button>
+</sc-if>
+<sc-if value="{{ noInput }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ startMic }}" aria-label="Bicara untuk mencatat" class="btn" style="width: 52px; height: 48px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FF7A6B; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.6" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+</button>
+</sc-if>
+</form>
+</sc-if>
+<sc-if value="{{ listening }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="padding: 16px 16px 20px; border-top: 3px solid #1F1B2D; background: #FFE7C2; display: flex; flex-direction: column; align-items: center; gap: 12px">
+<div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em">MENDENGARKAN…</div>
+<div aria-hidden="true" style="height: 36px; display: flex; align-items: center; gap: 4px">
+<sc-for list="{{ bars }}" as="b" hint-placeholder-count="14"><span class="bar" style="width: 6px; height: 32px; background: {{ b.color }}; animation-delay: {{ b.delay }}"></span></sc-for>
+</div>
+<div style="min-height: 44px; width: 100%; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 12px; padding: 10px 12px; font-size: 16px; text-align: center; color: {{ heardColor }}">{{ heardText }}</div>
+<div style="width: 100%; display: flex; gap: 10px">
+<button type="button" onClick="{{ cancelMic }}" class="btn" style="flex: 1; height: 50px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; font-family: inherit; font-size: 15px; font-weight: 700; color: #1F1B2D">Batal</button>
+<button type="button" onClick="{{ finishMic }}" class="btn" style="flex: 2; height: 50px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FF7A6B; box-shadow: 3px 3px 0 #1F1B2D; font-family: inherit; font-size: 15px; font-weight: 700; color: #1F1B2D">Selesai bicara</button>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.nid = 1;
+    this.timers = [];
+    this.state = {
+      msgs: [{ id: 0, role: 'ai', kind: 'text', text: 'Hai Rani! Mau catat apa? Ketik, tekan mikrofon untuk bicara, atau foto notanya. Aku isi detailnya, kamu tinggal cek lalu simpan.' }],
+      input: '', listening: false, heard: ''
+    };
+  }
+  componentWillUnmount() { this.timers.forEach(clearTimeout); clearInterval(this.iv); }
+  later(fn, ms) { this.timers.push(setTimeout(fn, ms)); }
+  push(m) { var self = this; m.id = this.nid++; this.setState(function (s) { return { msgs: s.msgs.concat([m]) }; }); }
+  replaceTyping(m) {
+    var self = this;
+    m.id = this.nid++;
+    this.setState(function (s) { return { msgs: s.msgs.filter(function (x) { return x.kind !== 'typing'; }).concat([m]) }; });
+  }
+  rp(n) { return 'Rp ' + Math.round(Math.abs(n)).toLocaleString('id-ID'); }
+  parseOne(p) {
+    var m = p.match(/(\d{1,3}(?:\.\d{3})+|\d+(?:[.,]\d+)?)\s*(rb|ribu|k|jt|juta)?\b/i);
+    if (!m) return null;
+    var raw = m[1], n;
+    if (/^\d{1,3}(\.\d{3})+$/.test(raw)) n = parseInt(raw.replace(/\./g, ''), 10);
+    else n = parseFloat(raw.replace(',', '.'));
+    var u = (m[2] || '').toLowerCase();
+    if (u === 'rb' || u === 'ribu' || u === 'k') n *= 1000;
+    else if (u === 'jt' || u === 'juta') n *= 1000000;
+    n = Math.round(n);
+    if (!n) return null;
+    var low = p.toLowerCase();
+    var type = /gaji|terima|dapat|masuk|bonus|dibayar|freelance|proyek|cair|hadiah/.test(low) ? 'in' : 'out';
+    var map = [
+      [/gaji/, 'Gaji'], [/freelance|proyek/, 'Freelance'], [/bonus/, 'Bonus'], [/hadiah|kado/, 'Hadiah'],
+      [/makan|kopi|minum|jajan|sarapan|bakso|nasi|snack/, 'Makanan'], [/ojek|bensin|parkir|tol|bus|kereta|taksi|angkot/, 'Transportasi'],
+      [/listrik|token|pulsa|internet|wifi|kuota|pdam/, 'Tagihan'], [/belanja|baju|sabun|beras|sayur|minyak/, 'Belanja'],
+      [/nonton|game|film|konser|langganan/, 'Hiburan'], [/obat|dokter|apotek/, 'Kesehatan'], [/buku|kursus|kelas/, 'Pendidikan']
+    ];
+    var cat = 'Lainnya';
+    for (var i = 0; i < map.length; i++) { if (map[i][0].test(low)) { cat = map[i][1]; break; } }
+    var acct = /bank|debit|qris|transfer|rekening/.test(low) ? 'Rekening bank' : 'Tunai';
+    var when = /kemarin/.test(low) ? 'Kemarin' : 'Hari ini';
+    var name = p.replace(m[0], ' ').replace(/\b(pakai|pake|via|dengan|dari|ke|tunai|cash|bank|rekening|debit|qris|tadi|kemarin|hari ini|aku|saya|beli|bayar|sebesar|udah|sudah)\b/gi, ' ').replace(/\s+/g, ' ').trim();
+    if (!name) name = cat;
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    return { name: name, cat: cat, acct: acct, when: when, amt: n, type: type };
+  }
+  parse(text) {
+    var self = this, out = [];
+    text.split(/,|;|\sdan\s|\sterus\s|\slalu\s/i).forEach(function (p) { var it = self.parseOne(p.trim()); if (it) out.push(it); });
+    return out;
+  }
+  respond(text) {
+    var self = this;
+    this.push({ role: 'ai', kind: 'typing', text: 'Koko sedang membaca…' });
+    this.later(function () {
+      var items = self.parse(text);
+      if (!items.length) {
+        self.replaceTyping({ role: 'ai', kind: 'text', text: 'Hmm, aku belum menangkap nominalnya. Berapa jumlahnya? Contoh: “bensin 30 ribu tunai”.' });
+      } else {
+        self.replaceTyping({ role: 'ai', kind: 'draft', saved: false, items: items,
+          text: items.length > 1 ? 'Aku pisahkan jadi ' + items.length + ' transaksi. Cek dulu, ya:' : 'Ini yang aku tangkap. Sudah benar?' });
+      }
+    }, 1000);
+  }
+  send(text, voice) {
+    if (!text || !text.trim()) return;
+    this.push({ role: 'user', kind: 'text', text: text.trim(), voice: !!voice });
+    this.setState({ input: '' });
+    this.respond(text);
+  }
+  photo() {
+    var self = this;
+    this.push({ role: 'user', kind: 'photo' });
+    this.push({ role: 'ai', kind: 'typing', text: 'Membaca nota…' });
+    this.later(function () {
+      self.replaceTyping({ role: 'ai', kind: 'draft', saved: false,
+        text: 'Notanya terbaca. Totalnya aku catat sebagai satu pengeluaran:',
+        note: '3 item terbaca: beras 5 kg, minyak goreng 2 L, sabun cuci. Metode bayar tidak tertulis, jadi aku pilih Tunai.',
+        items: [{ name: 'Belanja di Toko Sumber Rezeki', cat: 'Belanja', acct: 'Tunai', when: 'Hari ini', amt: 87500, type: 'out' }] });
+    }, 1600);
+  }
+  saveDraft(id) {
+    var self = this;
+    this.setState(function (s) { return { msgs: s.msgs.map(function (m) { return m.id === id ? Object.assign({}, m, { saved: true }) : m; }) }; });
+    this.later(function () { self.push({ role: 'ai', kind: 'text', text: 'Sip, sudah dicatat! Ada lagi yang mau ditambahkan?' }); }, 500);
+  }
+  startMic() {
+    var self = this;
+    var words = 'tadi kopi susu 22 ribu pakai bank'.split(' ');
+    var i = 0;
+    clearInterval(this.iv);
+    this.setState({ listening: true, heard: '' });
+    this.iv = setInterval(function () {
+      i++;
+      self.setState({ heard: words.slice(0, i).join(' ') });
+      if (i >= words.length) clearInterval(self.iv);
+    }, 380);
+  }
+  stopMic(sendIt) {
+    clearInterval(this.iv);
+    var h = this.state.heard;
+    this.setState({ listening: false, heard: '' });
+    if (sendIt && h) this.send(h, true);
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var tiles = { Makanan: '#FFE7C2', Transportasi: '#D8F3F7', Tagihan: '#FFD9E8', Belanja: '#FFD3CC', Hiburan: '#E9E2FF', Kesehatan: '#C9EFD7', Pendidikan: '#D8F3F7', Gaji: '#C9EFD7', Freelance: '#C9EFD7', Bonus: '#FFE7C2', Hadiah: '#FFD9E8', Lainnya: '#EFEAE0' };
+    var view = s.msgs.map(function (m) {
+      var items = (m.items || []).map(function (it, i) {
+        return {
+          name: it.name, initial: it.cat.charAt(0), tile: tiles[it.cat] || '#FFFFFF',
+          meta: (it.type === 'in' ? 'Pemasukan' : 'Pengeluaran') + ' · ' + it.cat + ' · ' + it.acct + ' · ' + it.when,
+          amount: (it.type === 'in' ? '+' : '−') + self.rp(it.amt),
+          color: it.type === 'in' ? '#1E6B40' : '#B42318',
+          divider: i ? '2px dashed #E3DACB' : 'none'
+        };
+      });
+      var total = (m.items || []).reduce(function (a, it) { return a + (it.type === 'in' ? it.amt : -it.amt); }, 0);
+      return {
+        isUserText: m.role === 'user' && m.kind === 'text', isUserPhoto: m.role === 'user' && m.kind === 'photo',
+        isAiText: m.role === 'ai' && m.kind === 'text', isTyping: m.kind === 'typing', isDraft: m.kind === 'draft',
+        text: m.text || '', voice: !!m.voice, items: items,
+        hasNote: !!m.note, note: m.note || '',
+        saved: !!m.saved, notSaved: m.kind === 'draft' && !m.saved,
+        headLabel: m.saved ? 'Tersimpan' : (items.length > 1 ? 'Draf · ' + items.length + ' transaksi · total ' + (total < 0 ? '−' : '+') + self.rp(total) : 'Draf · perlu konfirmasi'),
+        headBg: m.saved ? '#C9EFD7' : '#FFE7C2',
+        saveLabel: items.length > 1 ? 'Simpan semua' : 'Simpan',
+        save: function () { self.saveDraft(m.id); }
+      };
+    }).reverse();
+    var sugg = ['Makan siang 25rb tunai', 'Gaji masuk 6,5jt ke bank', 'Kopi 22rb, ojek 18rb', 'Token listrik 150rb kemarin'];
+    var barColors = ['#1F1B2D', '#FF7A6B', '#FFA94D', '#5BC8D6', '#FF9EC7'];
+    var bars = [];
+    for (var i = 0; i < 14; i++) bars.push({ color: barColors[i % 5], delay: ((i * 137) % 900) / 1000 + 's' });
+    return {
+      msgs: view,
+      input: s.input, hasInput: !!(s.input || '').trim(), noInput: !(s.input || '').trim(),
+      listening: s.listening, notListening: !s.listening,
+      heardText: s.heard || 'Mulai bicara…', heardColor: s.heard ? '#1F1B2D' : '#6B6478',
+      bars: bars,
+      suggestions: sugg.map(function (t) { return { label: t, use: function () { self.send(t, false); } }; }),
+      onInput: function (ev) { self.setState({ input: ev.target.value }); },
+      submit: function (ev) { if (ev && ev.preventDefault) ev.preventDefault(); self.send(self.state.input, false); },
+      tryPhoto: function () { self.photo(); },
+      startMic: function () { self.startMic(); },
+      cancelMic: function () { self.stopMic(false); },
+      finishMic: function () { self.stopMic(true); }
+    };
+  }
+}
+</script>
+</body>
+</html>

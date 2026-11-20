@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Flowca base layer — reset + perilaku bersama yang tidak bisa diekspresikan
+   sebagai utility tunggal (hover/press tombol retro, fokus, angka).
+   Impor SETELAH tokens.css.
+   ========================================================================== */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body { margin: 0; }
+
+  body {
+    background: var(--surface-page);
+    color: var(--text-primary);
+    font-family: var(--fc-font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--text-primary); }
+  a:hover { color: var(--text-danger); }
+
+  :focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+  input::placeholder, textarea::placeholder { color: var(--text-placeholder); }
+}
+
+@layer components {
+  /* Tombol retro: geser + bayangan memanjang saat hover, "ditekan" saat aktif.
+     Dipakai oleh komponen Button, LinkButton, dan kartu yang bisa diklik. */
+  .fc-press {
+    transition: transform var(--fc-ease-press), box-shadow var(--fc-ease-press);
+    cursor: pointer;
+  }
+  .fc-press:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: var(--fc-shadow-3); }
+  .fc-press:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--fc-ink); }
+  .fc-press:disabled { cursor: progress; }
+
+  /* Fokus field: border tinta + glow cyan, menggantikan outline default */
+  .fc-field:focus { outline: none; border-color: var(--border-strong); box-shadow: 0 0 0 3px var(--focus-glow); }
+
+  /* Angka nominal: lebar digit seragam */
+  .fc-num { font-family: var(--fc-font-body); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+  /* SVG pixel-art tetap tajam */
+  .fc-pixel { shape-rendering: crispEdges; image-rendering: pixelated; }
+
+  /* Teks hanya untuk pembaca layar */
+  .fc-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* Tambahan Flowca (bukan dari paket ekspor) ------------------------------- */
+@layer components {
+  /* Field gabungan (prefix "Rp" + input): glow fokus di bingkai luar. */
+  .fc-field-group:focus-within { border-color: var(--border-strong); box-shadow: 0 0 0 3px var(--focus-glow); }
+
+  /* Scrollbar disembunyikan untuk deretan chip yang bisa digeser. */
+  .fc-no-scrollbar { scrollbar-width: none; }
+  .fc-no-scrollbar::-webkit-scrollbar { display: none; }
+}

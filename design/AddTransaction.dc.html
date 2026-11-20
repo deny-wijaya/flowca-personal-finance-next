@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Flowca — Tambah transaksi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F1B2D}a:hover{color:#C2321F}
+.btn{transition:transform .08s ease, box-shadow .08s ease;cursor:pointer}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #1F1B2D !important}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #1F1B2D !important}
+.btn[disabled]{cursor:progress}
+.fld:focus{outline:none;box-shadow:0 0 0 3px #5BC8D6 !important}
+.chip{cursor:pointer}
+:focus-visible{outline:3px solid #2A8FA0;outline-offset:2px}
+input::placeholder,textarea::placeholder{color:#7A7287}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #8E8798; color: #1F1B2D; font-family: 'Space Grotesk', system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<a href="ProfileMenu.dc.html" aria-label="Tutup dan kembali ke beranda" style="height: 44px; flex: none; display: block"></a>
+<div role="dialog" aria-modal="true" aria-labelledby="add-title" style="flex: 1; min-height: 0; background: #FFF6E5; border-top: 3px solid #1F1B2D; border-radius: 22px 22px 0 0; display: flex; flex-direction: column">
+<div aria-hidden="true" style="align-self: center; width: 48px; height: 6px; background: #1F1B2D; margin-top: 10px"></div>
+<sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+<div style="padding: 8px 20px 10px; display: flex; align-items: center; justify-content: space-between">
+<h1 id="add-title" style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 24px; font-weight: 700">Tambah transaksi</h1>
+<a href="ProfileMenu.dc.html" aria-label="Tutup" style="width: 44px; height: 44px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+</a>
+</div>
+<form onSubmit="{{ submit }}" noValidate="{{ true }}" style="flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 0">
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 4px 20px 16px; display: flex; flex-direction: column; gap: 16px">
+<div role="radiogroup" aria-label="Jenis transaksi" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 3px solid #1F1B2D; border-radius: 12px; background: #FFFDF8; padding: 3px; gap: 3px">
+<sc-for list="{{ types }}" as="ty" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ ty.on }}" onClick="{{ ty.pick }}" class="chip" style="height: 40px; border: none; border-radius: 8px; background: {{ ty.bg }}; font-family: inherit; font-size: 14px; font-weight: 700; color: #1F1B2D">{{ ty.label }}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="add-amt" style="font-size: 13px; font-weight: 700">Jumlah</label>
+<div style="display: flex; align-items: stretch; border: 3px solid {{ amtBorder }}; border-radius: 12px; background: #FFFFFF; overflow: hidden; box-shadow: 4px 4px 0 #1F1B2D">
+<span style="display: flex; align-items: center; padding: 0 14px; background: {{ typeColor }}; border-right: 3px solid #1F1B2D; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; font-size: 22px; font-weight: 700">{{ sign }}Rp</span>
+<input id="add-amt" class="fld" type="text" inputMode="numeric" autoComplete="off" placeholder="0" value="{{ amount }}" onChange="{{ onAmount }}" aria-invalid="{{ amtInvalid }}" style="height: 64px; flex: 1; min-width: 0; border: none; background: transparent; padding: 0 14px; font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; font-size: 34px; font-weight: 700; color: #1F1B2D">
+</div>
+<sc-if value="{{ amtInvalid }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 12px; font-weight: 600; color: #B42318">Isi jumlahnya dulu, ya.</div></sc-if>
+</div>
+<sc-if value="{{ notTransfer }}" hint-placeholder-val="{{ true }}">
+<fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<legend style="font-size: 13px; font-weight: 700; padding: 0; margin-bottom: 8px">Kategori</legend>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+<button type="button" aria-pressed="{{ c.on }}" onClick="{{ c.pick }}" class="chip" style="min-height: 72px; border: {{ c.border }}; border-radius: 10px; background: {{ c.bg }}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 2px; font-family: inherit; color: #1F1B2D">
+<span aria-hidden="true" style="width: 30px; height: 30px; border: 2px solid #1F1B2D; border-radius: 6px; background: {{ c.tile }}; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 15px; font-weight: 700">{{ c.initial }}</span>
+<span style="font-size: 11px; font-weight: 700">{{ c.label }}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ catInvalid }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 12px; font-weight: 600; color: #B42318">Pilih satu kategori.</div></sc-if>
+</fieldset>
+</sc-if>
+<fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<legend style="font-size: 13px; font-weight: 700; padding: 0; margin-bottom: 8px">{{ acctLabel }}</legend>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{ accts }}" as="a" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{ a.on }}" onClick="{{ a.pick }}" class="chip" style="min-height: 44px; padding: 0 16px; border: 2px solid #1F1B2D; border-radius: 999px; background: {{ a.bg }}; color: {{ a.fg }}; font-family: inherit; font-size: 14px; font-weight: 700">{{ a.label }}</button>
+</sc-for>
+</div>
+</fieldset>
+<sc-if value="{{ isTransfer }}" hint-placeholder-val="{{ false }}">
+<fieldset style="border: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px">
+<legend style="font-size: 13px; font-weight: 700; padding: 0; margin-bottom: 8px">Ke akun</legend>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{ toAccts }}" as="a" hint-placeholder-count="2">
+<button type="button" aria-pressed="{{ a.on }}" onClick="{{ a.pick }}" class="chip" style="min-height: 44px; padding: 0 16px; border: 2px solid #1F1B2D; border-radius: 999px; background: {{ a.bg }}; color: {{ a.fg }}; font-family: inherit; font-size: 14px; font-weight: 700">{{ a.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ sameAcct }}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 12px; font-weight: 600; color: #B42318">Akun asal dan tujuan tidak boleh sama.</div></sc-if>
+</fieldset>
+</sc-if>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="add-date" style="font-size: 13px; font-weight: 700">Tanggal</label>
+<input id="add-date" class="fld" type="date" value="{{ date }}" onChange="{{ onDate }}" style="height: 46px; width: 100%; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 10px; font-family: inherit; font-size: 15px; color: #1F1B2D">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="add-time" style="font-size: 13px; font-weight: 700">Jam</label>
+<input id="add-time" class="fld" type="time" value="{{ time }}" onChange="{{ onTime }}" style="height: 46px; width: 100%; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 10px; font-family: inherit; font-size: 15px; color: #1F1B2D">
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="add-note" style="font-size: 13px; font-weight: 700">Catatan <span style="font-weight: 500; color: #4A4458">(opsional)</span></label>
+<input id="add-note" class="fld" type="text" placeholder="Misal: makan siang bareng tim" value="{{ note }}" onChange="{{ onNote }}" style="height: 46px; width: 100%; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFFFF; padding: 0 14px; font-family: inherit; font-size: 16px; color: #1F1B2D">
+</div>
+</div>
+<div style="padding: 12px 20px 20px; border-top: 3px solid #1F1B2D; background: #FFFDF8">
+<button type="submit" class="btn" disabled="{{ saving }}" style="height: 56px; width: 100%; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFA94D; box-shadow: 4px 4px 0 #1F1B2D; font-family: 'Pixelify Sans', monospace; font-size: 20px; font-weight: 700; color: #1F1B2D">{{ saveLabel }}</button>
+</div>
+</form>
+</sc-if>
+<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="flex: 1; padding: 28px 20px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center">
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 112px; height: 98px; display: block; margin-top: 24px"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<h1 id="add-title" style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 28px; font-weight: 700">Tersimpan!</h1>
+<div style="width: 100%; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 4px 4px 0 #1F1B2D; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; font-size: 28px; font-weight: 700; color: {{ doneColor }}">{{ doneAmount }}</div>
+<div style="font-size: 14px; color: #4A4458">{{ doneMeta }}</div>
+</div>
+<div style="font-size: 14px; color: #4A4458">Saldo dan anggaran sudah ikut diperbarui.</div>
+<div style="margin-top: auto; width: 100%; display: flex; flex-direction: column; gap: 12px">
+<a href="ProfileMenu.dc.html" class="btn" style="height: 54px; border: 3px solid #1F1B2D; border-radius: 10px; background: #5BC8D6; box-shadow: 4px 4px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 20px; font-weight: 700; text-decoration: none; color: #1F1B2D">Kembali ke beranda</a>
+<button type="button" onClick="{{ again }}" class="btn" style="height: 50px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 4px 4px 0 #1F1B2D; font-family: inherit; font-size: 16px; font-weight: 700; color: #1F1B2D">Tambah lagi</button>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = this.fresh();
+  }
+  fresh() {
+    return { type: 'out', amount: '', cat: '', acct: 'Tunai', to: 'Rekening bank', date: '2026-11-19', time: '12:30', note: '', errors: {}, saving: false, done: false };
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    var s = this.state, self = this, e = s.errors || {};
+    var typeDefs = [
+      { id: 'out', label: 'Pengeluaran', color: '#FF7A6B' },
+      { id: 'in', label: 'Pemasukan', color: '#5BC8D6' },
+      { id: 'tf', label: 'Transfer', color: '#FF9EC7' }
+    ];
+    var cur = typeDefs.filter(function (t) { return t.id === s.type; })[0];
+    var catDefs = s.type === 'in'
+      ? [['Gaji', '#C9EFD7'], ['Freelance', '#C9EFD7'], ['Bonus', '#FFE7C2'], ['Hadiah', '#FFD9E8'], ['Investasi', '#D8F3F7'], ['Lainnya', '#EFEAE0']]
+      : [['Makanan', '#FFE7C2'], ['Transportasi', '#D8F3F7'], ['Belanja', '#FFD3CC'], ['Tagihan', '#FFD9E8'], ['Hiburan', '#E9E2FF'], ['Kesehatan', '#C9EFD7'], ['Pendidikan', '#D8F3F7'], ['Lainnya', '#EFEAE0']];
+    var acctNames = ['Tunai', 'Rekening bank'];
+    function chip(name, key) {
+      var on = s[key] === name;
+      return { label: name, on: on, bg: on ? '#1F1B2D' : '#FFFDF8', fg: on ? '#FFF6E5' : '#1F1B2D', pick: function () { var o = {}; o[key] = name; self.setState(o); } };
+    }
+    var num = Number((s.amount || '').replace(/\D/g, '')) || 0;
+    var signChar = s.type === 'out' ? '−' : (s.type === 'in' ? '+' : '');
+    var dd = (s.date || '').split('-');
+    var months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    var dateTxt = dd.length === 3 ? Number(dd[2]) + ' ' + months[Number(dd[1])] + ' ' + dd[0] : '';
+    var meta = s.type === 'tf'
+      ? 'Transfer · ' + s.acct + ' → ' + s.to + ' · ' + dateTxt
+      : s.cat + ' · ' + s.acct + ' · ' + dateTxt + ', ' + (s.time || '').replace(':', '.');
+    return {
+      isForm: !s.done, isDone: s.done,
+      types: typeDefs.map(function (t) { var on = s.type === t.id; return { label: t.label, on: on, bg: on ? t.color : 'transparent', pick: function () { self.setState({ type: t.id, cat: '', errors: {} }); } }; }),
+      typeColor: cur.color, sign: signChar,
+      amount: s.amount, amtInvalid: !!e.amount, amtBorder: e.amount ? '#B42318' : '#1F1B2D',
+      notTransfer: s.type !== 'tf', isTransfer: s.type === 'tf',
+      cats: catDefs.map(function (c) {
+        var on = s.cat === c[0];
+        return { label: c[0], initial: c[0].charAt(0), tile: c[1], on: on, bg: on ? '#FFE7C2' : '#FFFDF8', border: on ? '3px solid #1F1B2D' : '2px solid #1F1B2D', pick: function () { self.setState({ cat: c[0] }); } };
+      }),
+      catInvalid: !!e.cat,
+      acctLabel: s.type === 'tf' ? 'Dari akun' : 'Akun',
+      accts: acctNames.map(function (n) { return chip(n, 'acct'); }),
+      toAccts: acctNames.map(function (n) { return chip(n, 'to'); }),
+      sameAcct: !!e.same,
+      date: s.date, time: s.time, note: s.note,
+      saving: s.saving, saveLabel: s.saving ? 'Menyimpan…' : 'Simpan transaksi',
+      doneAmount: signChar + 'Rp ' + num.toLocaleString('id-ID'),
+      doneColor: s.type === 'out' ? '#B42318' : (s.type === 'in' ? '#1E6B40' : '#1F1B2D'),
+      doneMeta: meta + (s.note ? ' · “' + s.note + '”' : ''),
+      onAmount: function (ev) {
+        var d = ev.target.value.replace(/\D/g, '').slice(0, 13);
+        self.setState({ amount: d ? Number(d).toLocaleString('id-ID') : '' });
+      },
+      onDate: function (ev) { self.setState({ date: ev.target.value }); },
+      onTime: function (ev) { self.setState({ time: ev.target.value }); },
+      onNote: function (ev) { self.setState({ note: ev.target.value }); },
+      submit: function (ev) {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        var x = self.state, er = {};
+        if (!(Number((x.amount || '').replace(/\D/g, '')) > 0)) er.amount = true;
+        if (x.type !== 'tf' && !x.cat) er.cat = true;
+        if (x.type === 'tf' && x.acct === x.to) er.same = true;
+        self.setState({ errors: er });
+        if (Object.keys(er).length) return;
+        self.setState({ saving: true });
+        self.t = setTimeout(function () { self.setState({ saving: false, done: true }); }, 900);
+      },
+      again: function () { self.setState(self.fresh()); }
+    };
+  }
+}
+</script>
+</body>
+</html>

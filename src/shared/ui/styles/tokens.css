@@ -1,0 +1,253 @@
+/* ==========================================================================
+   Flowca design tokens — sumber tunggal nilai visual.
+   Diekstrak dari file desain (design/*.dc.html). Jangan menulis hex, px
+   border, atau bayangan langsung di komponen: selalu lewat token ini.
+
+   Struktur:
+   1. Primitive  — nilai mentah (palet, skala).
+   2. Semantic   — makna (permukaan, teks, aksi, status). Komponen pakai ini.
+   3. @theme     — pemetaan ke utility Tailwind v4.
+   4. Keyframes  — animasi "8-bit" (steps).
+   ========================================================================== */
+
+/* 1. PRIMITIVE ------------------------------------------------------------ */
+:root {
+  /* Palet inti */
+  --fc-cream: #FFF6E5;
+  --fc-paper: #FFFDF8;
+  --fc-white: #FFFFFF;
+  --fc-ink: #1F1B2D;
+  --fc-ink-700: #3A3447;
+  --fc-ink-600: #4A4458;
+  --fc-ink-500: #6B6478;
+  --fc-ink-400: #7A7287;
+  --fc-ink-300: #8E8798;
+  --fc-sand-400: #B9AFA0;
+  --fc-sand-300: #C9C1B4;
+  --fc-sand-200: #E3DACB;
+  --fc-sand-100: #EFEAE0;
+
+  /* Aksen */
+  --fc-cyan: #5BC8D6;
+  --fc-coral: #FF7A6B;
+  --fc-orange: #FFA94D;
+  --fc-pink: #FF9EC7;
+
+  /* Tint (latar chip, tile kategori, state) */
+  --fc-orange-100: #FFE7C2;
+  --fc-orange-50: #FFF0D9;
+  --fc-cyan-100: #D8F3F7;
+  --fc-cyan-50: #E2F6F9;
+  --fc-pink-100: #FFD9E8;
+  --fc-coral-100: #FFD3CC;
+  --fc-coral-50: #FFE3DF;
+  --fc-green-100: #C9EFD7;
+  --fc-green-50: #E3F6EA;
+  --fc-lilac-100: #E9E2FF;
+
+  /* Status (lolos kontras 4.5:1 di atas paper/cream) */
+  --fc-red-700: #B42318;
+  --fc-red-800: #9C2A1B;
+  --fc-red-900: #8F2316;
+  --fc-green-700: #1E6B40;
+  --fc-teal-700: #2A8FA0;
+
+  /* Warna maskot Koko */
+  --fc-koko-rim: #F08A24;
+  --fc-koko-face: #FFC46B;
+  --fc-koko-cheek: #FF8FB8;
+
+  /* Tipografi */
+  --fc-font-display: var(--font-pixelify), "Pixelify Sans", monospace;
+  --fc-font-body: var(--font-space-grotesk), "Space Grotesk", system-ui, sans-serif;
+
+  /* Skala ukuran huruf (px) */
+  --fc-text-11: 11px;
+  --fc-text-12: 12px;
+  --fc-text-13: 13px;
+  --fc-text-14: 14px;
+  --fc-text-15: 15px;
+  --fc-text-16: 16px;
+  --fc-text-17: 17px;
+  --fc-text-18: 18px;
+  --fc-text-19: 19px;
+  --fc-text-20: 20px;
+  --fc-text-22: 22px;
+  --fc-text-24: 24px;
+  --fc-text-26: 26px;
+  --fc-text-28: 28px;
+  --fc-text-30: 30px;
+  --fc-text-32: 32px;
+  --fc-text-34: 34px;
+  --fc-text-36: 36px;
+  --fc-text-52: 52px;
+
+  /* Border, radius */
+  --fc-border-thin: 2px;
+  --fc-border: 3px;
+  --fc-radius-xs: 4px;
+  --fc-radius-sm: 6px;
+  --fc-radius-md: 8px;
+  --fc-radius-lg: 10px;
+  --fc-radius-xl: 12px;
+  --fc-radius-2xl: 14px;
+  --fc-radius-3xl: 16px;
+  --fc-radius-sheet: 22px;
+  --fc-radius-pill: 999px;
+
+  /* Bayangan offset keras (tanpa blur) */
+  --fc-shadow-1: 3px 3px 0 var(--fc-ink);
+  --fc-shadow-2: 4px 4px 0 var(--fc-ink);
+  --fc-shadow-3: 5px 5px 0 var(--fc-ink);
+  --fc-shadow-4: 6px 6px 0 var(--fc-ink);
+  --fc-shadow-5: 8px 8px 0 var(--fc-ink);
+
+  /* Ukuran kontrol */
+  --fc-touch: 44px;
+  --fc-control-sm: 40px;
+  --fc-control: 48px;
+  --fc-control-lg: 54px;
+  --fc-control-xl: 56px;
+
+  /* Gerak */
+  --fc-ease-press: 80ms ease;
+}
+
+/* 2. SEMANTIC ------------------------------------------------------------- */
+:root {
+  --surface-page: var(--fc-cream);
+  --surface-card: var(--fc-paper);
+  --surface-field: var(--fc-white);
+  --surface-inverse: var(--fc-ink);
+  --surface-hover: var(--fc-orange-50);
+  --surface-scrim: rgb(31 27 45 / 0.25);
+  --surface-overlay: rgb(31 27 45 / 0.55);
+
+  --text-primary: var(--fc-ink);
+  --text-secondary: var(--fc-ink-600);
+  --text-tertiary: var(--fc-ink-500);
+  --text-placeholder: var(--fc-ink-400);
+  --text-inverse: var(--fc-cream);
+  --text-danger: var(--fc-red-700);
+  --text-income: var(--fc-green-700);
+  --text-expense: var(--fc-red-700);
+
+  --border-strong: var(--fc-ink);
+  --border-dashed: var(--fc-sand-400);
+  --border-divider: var(--fc-sand-200);
+  --border-danger: var(--fc-red-700);
+
+  --focus-ring: var(--fc-teal-700);
+  --focus-glow: var(--fc-cyan);
+
+  /* Aksi: aksen dipilih per konteks, bukan satu "primary" global */
+  --action-login: var(--fc-coral);
+  --action-create: var(--fc-orange);
+  --action-info: var(--fc-cyan);
+  --action-reset: var(--fc-pink);
+
+  /* Status anggaran */
+  --budget-safe: var(--fc-cyan);
+  --budget-warn: var(--fc-orange);
+  --budget-over: var(--fc-coral);
+
+  /* Feedback */
+  --feedback-success-bg: var(--fc-green-50);
+  --feedback-error-bg: var(--fc-coral-50);
+  --feedback-info-bg: var(--fc-cyan-50);
+  --feedback-note-bg: var(--fc-orange-50);
+}
+
+/* 3. TAILWIND v4 ---------------------------------------------------------- */
+@theme inline {
+  --color-cream: var(--fc-cream);
+  --color-paper: var(--fc-paper);
+  --color-field: var(--fc-white);
+  --color-ink: var(--fc-ink);
+  --color-ink-700: var(--fc-ink-700);
+  --color-ink-600: var(--fc-ink-600);
+  --color-ink-500: var(--fc-ink-500);
+  --color-ink-400: var(--fc-ink-400);
+  --color-ink-300: var(--fc-ink-300);
+  --color-sand-400: var(--fc-sand-400);
+  --color-sand-300: var(--fc-sand-300);
+  --color-sand-200: var(--fc-sand-200);
+  --color-sand-100: var(--fc-sand-100);
+  --color-cyan: var(--fc-cyan);
+  --color-cyan-100: var(--fc-cyan-100);
+  --color-cyan-50: var(--fc-cyan-50);
+  --color-coral: var(--fc-coral);
+  --color-coral-100: var(--fc-coral-100);
+  --color-coral-50: var(--fc-coral-50);
+  --color-orange: var(--fc-orange);
+  --color-orange-100: var(--fc-orange-100);
+  --color-orange-50: var(--fc-orange-50);
+  --color-pink: var(--fc-pink);
+  --color-pink-100: var(--fc-pink-100);
+  --color-green-100: var(--fc-green-100);
+  --color-green-50: var(--fc-green-50);
+  --color-lilac-100: var(--fc-lilac-100);
+  --color-danger: var(--fc-red-700);
+  --color-danger-strong: var(--fc-red-800);
+  --color-income: var(--fc-green-700);
+  --color-focus: var(--fc-teal-700);
+  --color-koko-rim: var(--fc-koko-rim);
+  --color-koko-face: var(--fc-koko-face);
+  --color-koko-cheek: var(--fc-koko-cheek);
+
+  --font-display: var(--fc-font-display);
+  --font-body: var(--fc-font-body);
+  /* Hanya untuk potongan URL/kode di layar callback (desain memakai Space Mono). */
+  --font-mono: var(--font-space-mono), ui-monospace, monospace;
+
+  --text-11: var(--fc-text-11);
+  --text-12: var(--fc-text-12);
+  --text-13: var(--fc-text-13);
+  --text-14: var(--fc-text-14);
+  --text-15: var(--fc-text-15);
+  --text-16: var(--fc-text-16);
+  --text-17: var(--fc-text-17);
+  --text-18: var(--fc-text-18);
+  --text-19: var(--fc-text-19);
+  --text-20: var(--fc-text-20);
+  --text-22: var(--fc-text-22);
+  --text-24: var(--fc-text-24);
+  --text-26: var(--fc-text-26);
+  --text-28: var(--fc-text-28);
+  --text-30: var(--fc-text-30);
+  --text-32: var(--fc-text-32);
+  --text-34: var(--fc-text-34);
+  --text-36: var(--fc-text-36);
+  --text-52: var(--fc-text-52);
+
+  --radius-xs: var(--fc-radius-xs);
+  --radius-sm: var(--fc-radius-sm);
+  --radius-md: var(--fc-radius-md);
+  --radius-lg: var(--fc-radius-lg);
+  --radius-xl: var(--fc-radius-xl);
+  --radius-2xl: var(--fc-radius-2xl);
+  --radius-3xl: var(--fc-radius-3xl);
+  --radius-sheet: var(--fc-radius-sheet);
+
+  --shadow-hard-1: var(--fc-shadow-1);
+  --shadow-hard-2: var(--fc-shadow-2);
+  --shadow-hard-3: var(--fc-shadow-3);
+  --shadow-hard-4: var(--fc-shadow-4);
+  --shadow-hard-5: var(--fc-shadow-5);
+
+  --animate-pixel-spin: pixel-spin 0.9s steps(8) infinite;
+  --animate-pixel-wave: pixel-wave 0.9s steps(4) infinite;
+  --animate-pixel-blink: pixel-blink 1s steps(2) infinite;
+  --animate-pixel-hop: pixel-hop 0.6s steps(3) infinite;
+}
+
+/* 4. KEYFRAMES ------------------------------------------------------------ */
+@keyframes pixel-spin { to { transform: rotate(360deg); } }
+@keyframes pixel-wave { 0%, 100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
+@keyframes pixel-blink { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@keyframes pixel-hop { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* Gerak dimatikan bila pengguna meminta */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

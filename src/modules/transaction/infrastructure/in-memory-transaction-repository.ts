@@ -29,18 +29,23 @@ export class InMemoryTransactionRepository implements TransactionRepository {
   }
 }
 
-/** Contoh data bulan berjalan, supaya dashboard langsung terisi saat mode mock. */
+/**
+ * Contoh data bulan berjalan (sama dengan data di file desain Flowca), supaya
+ * dashboard langsung terisi saat mode mock. Tanggal di atas hari ini dipotong ke hari ini.
+ */
 export function createSeedTransactions(now: Date = new Date()): Transaction[] {
-  const day = (d: number) => new Date(now.getFullYear(), now.getMonth(), Math.min(d, now.getDate()), 9);
-  const rows: Omit<Transaction, "id">[] = [
-    { type: "income", amount: 12_500_000, category: "Gaji", note: "Gaji bulanan", occurredAt: day(1) },
-    { type: "expense", amount: 1_850_000, category: "Tagihan", note: "Cicilan kos", occurredAt: day(2) },
-    { type: "expense", amount: 450_000, category: "Tagihan", note: "Token listrik PLN", occurredAt: day(3) },
-    { type: "expense", amount: 186_000, category: "Hiburan", note: "Netflix + Spotify", occurredAt: day(5) },
-    { type: "expense", amount: 85_000, category: "Makan & Minum", note: "Makan siang tim", occurredAt: day(6) },
-    { type: "expense", amount: 64_000, category: "Transportasi", note: "Gojek ke kantor", occurredAt: day(6) },
-    { type: "income", amount: 2_000_000, category: "Freelance", note: "Landing page klien", occurredAt: day(8) },
-    { type: "expense", amount: 742_500, category: "Belanja", note: "Belanja bulanan Superindo", occurredAt: day(9) },
+  const at = (day: number, hour: number, minute: number) => {
+    const date = new Date(now.getFullYear(), now.getMonth(), Math.min(day, now.getDate()), hour, minute);
+    return date.getTime() > now.getTime() ? new Date(now.getTime() - 60_000) : date;
+  };
+  const rows: NewTransaction[] = [
+    { type: "income", amount: 6_500_000, category: "Gaji", note: "Gaji November", accountId: "bank", occurredAt: at(1, 9, 0) },
+    { type: "expense", amount: 432_500, category: "Belanja", note: "Belanja bulanan", accountId: "bank", occurredAt: at(14, 10, 15) },
+    { type: "income", amount: 1_200_000, category: "Freelance", note: "Proyek desain logo", accountId: "bank", occurredAt: at(15, 16, 0) },
+    { type: "expense", amount: 18_000, category: "Transportasi", note: "Ojek ke kantor", accountId: "bank", occurredAt: at(18, 7, 45) },
+    { type: "expense", amount: 150_000, category: "Tagihan", note: "Token listrik", accountId: "bank", occurredAt: at(18, 19, 20) },
+    { type: "expense", amount: 22_000, category: "Makanan", note: "Kopi susu", accountId: "bank", occurredAt: at(19, 8, 10) },
+    { type: "expense", amount: 25_000, category: "Makanan", note: "Makan siang", accountId: "cash", occurredAt: at(19, 12, 30) },
   ];
   return rows.map((row, index) => ({ ...row, id: `seed-${index + 1}` }));
 }

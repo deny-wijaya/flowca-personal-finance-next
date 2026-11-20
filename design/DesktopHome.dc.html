@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Flowca — Beranda (desktop)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#1F1B2D}a:hover{color:#C2321F}
+.btn{transition:transform .08s ease, box-shadow .08s ease;cursor:pointer}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #1F1B2D !important}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 #1F1B2D !important}
+.btn[disabled]{cursor:progress}
+.nv:hover{background:#FFE7C2 !important}
+.row:hover{background:#FFF0D9 !important}
+.chip{cursor:pointer}
+.fld:focus{outline:none;border-color:#1F1B2D !important;box-shadow:0 0 0 3px #5BC8D6 !important}
+:focus-visible{outline:3px solid #2A8FA0;outline-offset:2px}
+input::placeholder{color:#7A7287}
+.num{font-variant-numeric:tabular-nums}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .9s steps(8) infinite}
+</style>
+</helmet>
+<div style="width: 100%; min-height: 900px; background: #FFF6E5; color: #1F1B2D; font-family: 'Space Grotesk', system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch">
+<aside style="flex: 1 1 248px; max-width: 280px; background: #FFFDF8; border-right: 3px solid #1F1B2D; padding: 22px 16px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; align-items: center; gap: 10px; padding: 0 4px">
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 42px; height: 37px; display: block; flex: none"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<div style="font-family: 'Pixelify Sans', monospace; font-size: 28px; font-weight: 700; line-height: 1">Flowca</div>
+</div>
+<button type="button" onClick="{{ togglePanel }}" aria-expanded="{{ panelOpen }}" aria-controls="quick-panel" class="btn" style="height: 56px; width: 100%; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFA94D; box-shadow: 4px 4px 0 #1F1B2D; display: flex; align-items: center; gap: 10px; padding: 0 14px; font-family: inherit; font-size: 16px; font-weight: 700; color: #1F1B2D; position: relative">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+<span style="flex: 1; text-align: left">Catat cepat</span>
+<span style="border: 2px solid #1F1B2D; border-radius: 4px; background: #FF9EC7; padding: 0 5px; font-family: 'Pixelify Sans', monospace; font-size: 12px; line-height: 18px">AI</span>
+<kbd style="border: 2px solid #1F1B2D; border-radius: 4px; background: #FFFDF8; padding: 0 6px; font-family: inherit; font-size: 12px; line-height: 18px">N</kbd>
+</button>
+<nav aria-label="Navigasi utama"><ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px">
+<li><a href="DesktopHome.dc.html" aria-current="page" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid #1F1B2D; background: #FF7A6B; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z"/></svg><span>Beranda</span></a></li>
+<li><a href="DesktopTransactions.dc.html" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/></svg><span>Transaksi</span></a></li>
+<li><a href="#budget" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg><span>Anggaran</span></a></li>
+<li><a href="#insights" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-7M2 20h20"/></svg><span>Insight</span></a></li>
+<li><a href="#accounts" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 11h5v4h-5z"/></svg><span>Akun</span></a></li>
+<li><a href="#settings" class="nv" style="min-height: 46px; padding: 0 12px; border-radius: 10px; border: 2px solid transparent; background: transparent; display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 700; text-decoration: none; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg><span>Pengaturan</span></a></li>
+</ul></nav>
+<a href="ProfileMenu.dc.html" class="nv" style="margin-top: auto; border: 3px solid #1F1B2D; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1F1B2D; background: #FFFDF8">
+<span aria-hidden="true" style="width: 40px; height: 40px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FF9EC7; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 16px; font-weight: 700; flex: none">RP</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 700">Rani Putri</span><span style="font-size: 12px; color: #4A4458; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">rani.putri@gmail.com</span></span>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3" stroke-linecap="square" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+</a>
+</aside>
+<main style="flex: 999 1 560px; min-width: 0; padding: 28px 32px 40px; display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 36px; font-weight: 700">Halo, Rani</h1>
+<div style="font-size: 15px; color: #4A4458">Kamis, 19 November 2026 · 11 hari lagi menuju akhir bulan</div>
+</div>
+<div style="display: flex; align-items: center; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D">
+<button type="button" aria-label="Bulan sebelumnya" style="width: 44px; height: 42px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<span style="font-size: 14px; font-weight: 700">November 2026</span>
+<button type="button" aria-label="Bulan berikutnya" style="width: 44px; height: 42px; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</div>
+</div>
+<section aria-label="Ringkasan" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px">
+<div style="background: #5BC8D6; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700">Total saldo</div>
+<div class="num" style="font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Rp 9.552.500</div>
+<div style="font-size: 13px; color: #3A3447">2 akun · Tunai, Rekening bank</div>
+</div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700"><span aria-hidden="true" style="width: 10px; height: 10px; background: #5BC8D6; border: 2px solid #1F1B2D"></span>Masuk · Nov</div>
+<div class="num" style="font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Rp 7.700.000</div>
+<div style="font-size: 13px; color: #3A3447">2 transaksi</div>
+</div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700"><span aria-hidden="true" style="width: 10px; height: 10px; background: #FF7A6B; border: 2px solid #1F1B2D"></span>Keluar · Nov</div>
+<div class="num" style="font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Rp 647.500</div>
+<div style="font-size: 13px; color: #3A3447">5 transaksi</div>
+</div>
+<div style="background: #FF9EC7; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; padding: 16px 18px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700">Sisa anggaran</div>
+<div class="num" style="font-size: 28px; font-weight: 700; letter-spacing: -0.01em">Rp 2.332.500</div>
+<div style="font-size: 13px; color: #3A3447">dari Rp 2.980.000</div>
+</div>
+</section>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; align-items: start">
+<section aria-labelledby="dh-recent" style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 3px solid #1F1B2D">
+<h2 id="dh-recent" style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 22px; font-weight: 700">Transaksi terbaru</h2>
+<a href="DesktopTransactions.dc.html" style="font-size: 14px; font-weight: 700; padding: 8px 0">Lihat semua</a>
+</div>
+<ul style="list-style: none; margin: 0; padding: 0">
+<sc-for list="{{ recent }}" as="t" hint-placeholder-count="5">
+<li style="border-top: {{ t.divider }}"><a href="DesktopTransactions.dc.html" class="row" style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; text-decoration: none; color: #1F1B2D; background: #FFFDF8">
+<span aria-hidden="true" style="width: 38px; height: 38px; border: 2px solid #1F1B2D; border-radius: 8px; background: {{ t.tile }}; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-size: 16px; font-weight: 700; flex: none">{{ t.initial }}</span>
+<span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14px; font-weight: 700">{{ t.name }}</span><span style="font-size: 12px; color: #4A4458">{{ t.meta }}</span></span>
+<span class="num" style="font-size: 14px; font-weight: 700; color: {{ t.color }}; white-space: nowrap">{{ t.amount }}</span>
+</a></li>
+</sc-for>
+</ul>
+</section>
+<section aria-labelledby="dh-budget" style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 5px 5px 0 #1F1B2D; overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 3px solid #1F1B2D">
+<h2 id="dh-budget" style="margin: 0; font-family: 'Pixelify Sans', monospace; font-size: 22px; font-weight: 700">Anggaran</h2>
+<a href="#budget" style="font-size: 14px; font-weight: 700; padding: 8px 0">Atur</a>
+</div>
+<ul style="list-style: none; margin: 0; padding: 8px 16px 14px; display: flex; flex-direction: column; gap: 14px">
+<sc-for list="{{ budgets }}" as="b" hint-placeholder-count="5">
+<li style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 14px; font-weight: 700">{{ b.name }}</span>
+<span style="display: flex; align-items: center; gap: 8px"><span class="num" style="font-size: 13px; color: #4A4458">{{ b.detail }}</span><span style="font-size: 11px; font-weight: 700; border: 2px solid #1F1B2D; border-radius: 4px; padding: 0 6px; background: {{ b.badgeBg }}">{{ b.badge }}</span></span>
+</div>
+<span aria-hidden="true" style="height: 14px; border: 2px solid #1F1B2D; background: #FFFFFF; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 2px; padding: 1px">
+<sc-for list="{{ b.segs }}" as="x" hint-placeholder-count="20"><span style="background: {{ x.bg }}"></span></sc-for>
+</span>
+</li>
+</sc-for>
+</ul>
+</section>
+</div>
+</main>
+<sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+<aside id="quick-panel" aria-label="Catat cepat" style="flex: 1 1 340px; max-width: 400px; border-left: 3px solid #1F1B2D; background: #FFFDF8; display: flex; flex-direction: column; min-height: 860px">
+<div style="padding: 14px 16px; border-bottom: 3px solid #1F1B2D; display: flex; align-items: center; gap: 10px; background: #FFE7C2">
+<svg viewBox="0 0 16 14" shape-rendering="crispEdges" aria-hidden="true" style="width: 36px; height: 32px; display: block; flex: none"><path fill="#1F1B2D" d="M5 0h6v1h-6zM3 1h2v1h-2zM11 1h2v1h-2zM2 2h1v1h-1zM13 2h1v1h-1zM1 3h1v1h-1zM14 3h1v1h-1zM1 4h1v1h-1zM14 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM15 5h1v1h-1zM0 6h1v1h-1zM6 6h1v1h-1zM10 6h1v1h-1zM15 6h1v1h-1zM0 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM15 8h1v1h-1zM0 9h1v1h-1zM5 9h1v1h-1zM10 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM6 10h4v1h-4zM14 10h1v1h-1zM1 11h1v1h-1zM14 11h1v1h-1zM2 12h2v1h-2zM12 12h2v1h-2zM4 13h8v1h-8z"/><path fill="#F08A24" d="M5 1h6v1h-6zM3 2h2v1h-2zM11 2h2v1h-2zM2 3h1v1h-1zM13 3h1v1h-1zM2 4h1v1h-1zM13 4h1v1h-1zM1 5h1v1h-1zM14 5h1v1h-1zM1 6h1v1h-1zM14 6h1v1h-1zM1 7h1v1h-1zM14 7h1v1h-1zM1 8h1v1h-1zM14 8h1v1h-1zM1 9h1v1h-1zM14 9h1v1h-1zM2 10h1v1h-1zM13 10h1v1h-1zM2 11h2v1h-2zM12 11h2v1h-2zM4 12h8v1h-8z"/><path fill="#FFC46B" d="M5 2h6v1h-6zM3 3h2v1h-2zM7 3h6v1h-6zM3 4h1v1h-1zM6 4h7v1h-7zM2 5h4v1h-4zM7 5h3v1h-3zM11 5h3v1h-3zM2 6h4v1h-4zM7 6h3v1h-3zM11 6h3v1h-3zM2 7h12v1h-12zM2 8h1v1h-1zM5 8h6v1h-6zM13 8h1v1h-1zM2 9h3v1h-3zM6 9h4v1h-4zM11 9h3v1h-3zM3 10h3v1h-3zM10 10h3v1h-3zM4 11h8v1h-8z"/><path fill="#FFF6E5" d="M5 3h2v1h-2zM4 4h2v1h-2z"/><path fill="#FF8FB8" d="M3 8h2v1h-2zM11 8h2v1h-2z"/></svg>
+<div style="flex: 1; display: flex; flex-direction: column; gap: 1px"><h2 style="margin: 0; font-size: 18px; font-weight: 700">Catat cepat</h2><span style="font-size: 12px; color: #4A4458">Koko · simulasi, belum terhubung ke AI</span></div>
+<button type="button" onClick="{{ togglePanel }}" aria-label="Tutup panel catat cepat" style="width: 40px; height: 40px; border: 2px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="3.2" stroke-linecap="square" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+</div>
+<div role="log" aria-label="Percakapan dengan Koko" style="flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto">
+<div style="align-self: flex-start; max-width: 88%; background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px 14px 14px 4px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 14px; line-height: 1.45">Hai Rani! Ketik, bicara, atau seret foto nota ke sini. Aku isi detailnya, kamu tinggal cek.</div>
+<div style="align-self: flex-end; max-width: 80%; background: #5BC8D6; border: 3px solid #1F1B2D; border-radius: 14px 14px 4px 14px; box-shadow: 3px 3px 0 #1F1B2D; padding: 10px 12px; font-size: 14px">kopi 22rb, ojek 18rb pakai bank</div>
+<div style="background: #FFFDF8; border: 3px solid #1F1B2D; border-radius: 14px; box-shadow: 4px 4px 0 #1F1B2D; overflow: hidden">
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: {{ draftHead }}; border-bottom: 3px solid #1F1B2D; font-size: 12px; font-weight: 700"><span>{{ draftLabel }}</span><span style="border: 2px solid #1F1B2D; border-radius: 4px; padding: 0 6px; background: #FFFFFF; font-size: 11px">diisi AI</span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px"><span aria-hidden="true" style="width: 34px; height: 34px; border: 2px solid #1F1B2D; border-radius: 8px; background: #FFE7C2; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-weight: 700; flex: none">M</span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 700">Kopi</span><span style="font-size: 12px; color: #4A4458">Makanan · Rekening bank · Hari ini</span></span><span class="num" style="font-size: 14px; font-weight: 700; color: #B42318">−Rp 22.000</span></div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 2px dashed #E3DACB"><span aria-hidden="true" style="width: 34px; height: 34px; border: 2px solid #1F1B2D; border-radius: 8px; background: #D8F3F7; display: flex; align-items: center; justify-content: center; font-family: 'Pixelify Sans', monospace; font-weight: 700; flex: none">T</span><span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 700">Ojek</span><span style="font-size: 12px; color: #4A4458">Transportasi · Rekening bank · Hari ini</span></span><span class="num" style="font-size: 14px; font-weight: 700; color: #B42318">−Rp 18.000</span></div>
+<sc-if value="{{ draftPending }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; gap: 8px; padding: 10px 12px 12px; border-top: 2px dashed #E3DACB">
+<button type="button" onClick="{{ saveDraft }}" class="btn" style="flex: 1; height: 42px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; font-family: inherit; font-size: 14px; font-weight: 700; color: #1F1B2D">Simpan semua</button>
+<a href="AddTransaction.dc.html" class="btn" style="height: 42px; padding: 0 14px; border: 3px solid #1F1B2D; border-radius: 10px; background: #FFFDF8; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; font-size: 14px; font-weight: 700; text-decoration: none; color: #1F1B2D">Ubah</a>
+</div>
+</sc-if>
+<sc-if value="{{ draftSaved }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="padding: 10px 12px; border-top: 2px dashed #E3DACB; font-size: 13px; font-weight: 700; color: #1E6B40">Tersimpan ke riwayat</div>
+</sc-if>
+</div>
+</div>
+<div style="padding: 0 16px 12px">
+<button type="button" class="chip" style="width: 100%; min-height: 64px; border: 3px dashed #1F1B2D; border-radius: 12px; background: #FFF6E5; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: inherit; font-size: 14px; font-weight: 600; color: #1F1B2D"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.4" stroke-linecap="square" aria-hidden="true"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Seret foto nota ke sini, atau klik untuk pilih</span></button>
+</div>
+<form onSubmit="{{ noop }}" style="margin: 0; padding: 12px 16px 16px; border-top: 3px solid #1F1B2D; display: flex; gap: 8px; align-items: center">
+<label for="qp-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ketik transaksi</label>
+<input id="qp-input" class="fld" type="text" autoComplete="off" placeholder="Contoh: bensin 30rb tunai" style="flex: 1; min-width: 0; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFFFFF; padding: 0 12px; font-family: inherit; font-size: 15px; color: #1F1B2D">
+<button type="button" aria-label="Bicara untuk mencatat" class="btn" style="width: 48px; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FF7A6B; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.6" stroke-linecap="square" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+<button type="submit" aria-label="Kirim" class="btn" style="width: 48px; height: 46px; border: 3px solid #1F1B2D; border-radius: 12px; background: #FFA94D; box-shadow: 3px 3px 0 #1F1B2D; display: flex; align-items: center; justify-content: center; flex: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1F1B2D" stroke-width="2.8" stroke-linecap="square" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></button>
+</form>
+<div style="padding: 0 16px 14px; font-size: 12px; color: #4A4458">Enter untuk kirim · Esc untuk tutup panel</div>
+</aside>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"panelOpenAtStart":{"editor":"boolean","default":true,"section":"Simulasi"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { panelOpen: props.panelOpenAtStart ?? true, draftSaved: false };
+  }
+  componentDidUpdate(prev) { if (prev.panelOpenAtStart !== this.props.panelOpenAtStart) this.setState({ panelOpen: this.props.panelOpenAtStart ?? true }); }
+  renderVals() {
+    var self = this, s = this.state;
+    var all = [
+      { d: 19, date: 'Kam, 19 Nov', time: '12.30', name: 'Makan siang', cat: 'Makanan', acct: 'Tunai', amt: -25000 },
+      { d: 19, date: 'Kam, 19 Nov', time: '08.10', name: 'Kopi susu', cat: 'Makanan', acct: 'Rekening bank', amt: -22000 },
+      { d: 18, date: 'Rab, 18 Nov', time: '19.20', name: 'Token listrik', cat: 'Tagihan', acct: 'Rekening bank', amt: -150000 },
+      { d: 18, date: 'Rab, 18 Nov', time: '07.45', name: 'Ojek ke kantor', cat: 'Transportasi', acct: 'Rekening bank', amt: -18000 },
+      { d: 15, date: 'Min, 15 Nov', time: '16.00', name: 'Proyek desain logo', cat: 'Freelance', acct: 'Rekening bank', amt: 1200000 },
+      { d: 14, date: 'Sab, 14 Nov', time: '10.15', name: 'Belanja bulanan', cat: 'Belanja', acct: 'Rekening bank', amt: -432500 },
+      { d: 1, date: 'Min, 1 Nov', time: '09.00', name: 'Gaji November', cat: 'Gaji', acct: 'Rekening bank', amt: 6500000 }
+    ];
+    var tiles = { Makanan: '#FFE7C2', Transportasi: '#D8F3F7', Tagihan: '#FFD9E8', Belanja: '#FFD3CC', Gaji: '#C9EFD7', Freelance: '#C9EFD7' };
+    function rp(n) { return 'Rp ' + Math.abs(n).toLocaleString('id-ID'); }
+    function signed(n) { return (n < 0 ? '−' : '+') + rp(n); }
+    var recent = all.slice(0, 5).map(function (t, i) {
+      return { name: t.name, initial: t.cat.charAt(0), tile: tiles[t.cat], meta: t.cat + ' · ' + t.acct + ' · ' + t.date, amount: signed(t.amt), color: t.amt < 0 ? '#B42318' : '#1E6B40', divider: i ? '2px dashed #E3DACB' : 'none' };
+    });
+    var cats = [['Makanan', 47000, 1500000], ['Transportasi', 18000, 600000], ['Tagihan', 150000, 180000], ['Belanja', 432500, 400000], ['Hiburan', 0, 300000]];
+    var budgets = cats.map(function (c) {
+      var r = c[1] / c[2], over = r > 1, warn = !over && r >= 0.8;
+      var fill = over ? '#FF7A6B' : (warn ? '#FFA94D' : '#5BC8D6');
+      var n = over ? 20 : Math.round(r * 20); if (c[1] > 0 && n === 0) n = 1;
+      var segs = []; for (var k = 0; k < 20; k++) segs.push({ bg: k < n ? fill : 'transparent' });
+      return { name: c[0], detail: rp(c[1]) + ' / ' + rp(c[2]), badge: over ? 'Lewat batas' : (warn ? 'Hampir habis' : 'Aman'), badgeBg: over ? '#FF7A6B' : (warn ? '#FFA94D' : '#D8F3F7'), segs: segs };
+    });
+    return {
+      panelOpen: s.panelOpen,
+      togglePanel: function () { self.setState({ panelOpen: !self.state.panelOpen }); },
+      draftPending: !s.draftSaved, draftSaved: s.draftSaved,
+      draftLabel: s.draftSaved ? 'Tersimpan' : 'Draf · 2 transaksi · total −Rp 40.000',
+      draftHead: s.draftSaved ? '#C9EFD7' : '#FFE7C2',
+      saveDraft: function () { self.setState({ draftSaved: true }); },
+      noop: function (ev) { if (ev && ev.preventDefault) ev.preventDefault(); },
+      recent: recent, budgets: budgets
+    };
+  }
+}
+</script>
+</body>
+</html>

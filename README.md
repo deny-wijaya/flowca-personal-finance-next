@@ -33,24 +33,36 @@ Kontrak endpoint dan format response yang diharapkan ada di PRD bagian 8.4. Requ
 
 ```
 src/
-├── app/                         # Routing saja: page, layout, error, loading
-│   └── (main)/                  # Grup halaman yang memakai navigasi utama
-│       ├── dashboard/page.tsx
-│       └── transactions/page.tsx
+├── app/                         # Routing saja: page memanggil use case lalu memetakan ke view model
+│   ├── (auth)/                  # /login, /register, /forgot-password, /reset-password, /auth/callback, /onboarding
+│   └── (app)/                   # AppShell: /dashboard, /transactions(/new), /budget, /quick-add, dll.
 ├── modules/
-│   └── transaction/
-│       ├── domain/              # Entity, aturan bisnis, interface repository
-│       ├── application/         # Use case
-│       ├── infrastructure/      # Repository HTTP & mock, DTO + mapper
-│       └── presentation/        # Komponen, section async, Server Action
+│   ├── transaction/             # domain, application, infrastructure, presentation
+│   ├── account/  budget/        # saldo per akun & anggaran per kategori (masih in-memory)
+│   ├── auth/                    # autentikasi tiruan (mode prototipe) di balik port AuthGateway
+│   ├── quick-add/               # Catat cepat: parser tiruan di balik port QuickEntryParser
+│   └── dashboard/               # presentation saja (menggabungkan modul lain)
+│       └── presentation/
+│           ├── screens/         # Komponen murni: input view model, output markup
+│           ├── components/      # Komposit milik modul (TransactionRow, BudgetRow, DraftCard, ...)
+│           └── view-models/     # Mapper + format tampilan (Rupiah, tanggal, tanda +/−), dengan unit test
 ├── shared/
+│   ├── ui/styles/               # tokens.css (satu-satunya sumber nilai visual) + base.css
+│   ├── ui/primitives/           # Button, TextField, Card, Chip, Badge, Icon, Koko, PixelProgress, Dialog, ...
+│   ├── ui/layout/               # AppShell, BottomNav, Sidebar, MonthSwitcher, StatCard, PrototypeBanner
+│   ├── lib/                     # cn(), format.ts, month.ts
 │   ├── config/env.ts            # Validasi env (server-only)
-│   ├── domain/errors.ts         # DomainError, ValidationError
-│   ├── infrastructure/http/     # HttpClient & HttpError
-│   ├── lib/format.ts            # Format Rupiah dan tanggal
-│   └── ui/                      # Komponen UI generik
+│   └── infrastructure/http/     # HttpClient & HttpError
 └── di/container.ts              # Composition root: memilih mock atau API
+design/                          # Sumber desain Flowca (*.dc.html, canvas.json) sebagai referensi
 ```
+
+## Aturan UI
+
+- Nilai warna, ukuran huruf, border, radius, dan bayangan hanya dari `src/shared/ui/styles/tokens.css`. ESLint menolak hex dan nilai arbitrer `px` di `className` / `cva`.
+- Varian visual lewat props `cva` (`tone`, `size`); `className` dari luar hanya untuk layout.
+- Format angka & tanggal dibuat di mapper `view-models/`, bukan di JSX. Warna kategori dari `categoryTone()`, status anggaran dari `budgetTone()`.
+- Screen tidak boleh import `@/di/container` atau infrastructure (dicek ESLint).
 
 ## Menambah fitur baru (contoh: Budget)
 

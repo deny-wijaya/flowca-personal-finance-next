@@ -12,7 +12,7 @@ function trx(partial: Partial<Transaction> & Pick<Transaction, "id">): Transacti
   return {
     type: "expense",
     amount: 50_000,
-    category: "Makan & Minum",
+    category: "Makanan",
     occurredAt: new Date(2026, 10, 10),
     ...partial,
   };
@@ -26,7 +26,7 @@ describe("CreateTransaction", () => {
     const created = await useCase.execute({
       type: "expense",
       amount: 85_000,
-      category: "Makan & Minum",
+      category: "Makanan",
       note: "   ",
       occurredAt: new Date(2026, 10, 12),
     });
@@ -48,7 +48,7 @@ describe("CreateTransaction", () => {
     const promise = useCase.execute({
       type: "expense",
       amount: 85_000,
-      category: "Makan & Minum",
+      category: "Makanan",
       occurredAt: new Date(2026, 10, 12),
       ...override,
     });
@@ -79,7 +79,7 @@ describe("GetMonthlySummary", () => {
       trx({ id: "1", type: "income", amount: 12_500_000, category: "Gaji", occurredAt: new Date(2026, 10, 1) }),
       trx({ id: "2", amount: 1_850_000, category: "Tagihan", occurredAt: new Date(2026, 10, 2) }),
       trx({ id: "3", amount: 450_000, category: "Tagihan", occurredAt: new Date(2026, 10, 3) }),
-      trx({ id: "4", amount: 85_000, category: "Makan & Minum", occurredAt: new Date(2026, 10, 30, 23) }),
+      trx({ id: "4", amount: 85_000, category: "Makanan", occurredAt: new Date(2026, 10, 30, 23) }),
       trx({ id: "5", amount: 999_000, category: "Belanja", occurredAt: new Date(2026, 9, 31) }), // Oktober
     ]);
 
@@ -90,7 +90,7 @@ describe("GetMonthlySummary", () => {
     expect(summary.netCashflow).toBe(10_115_000);
     expect(summary.expenseByCategory).toEqual([
       { category: "Tagihan", amount: 2_300_000 },
-      { category: "Makan & Minum", amount: 85_000 },
+      { category: "Makanan", amount: 85_000 },
     ]);
   });
 });

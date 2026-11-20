@@ -11,6 +11,8 @@ const envSchema = z
     DATA_SOURCE: z.enum(["mock", "api"]).default("mock"),
     API_BASE_URL: z.url().optional(),
     API_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
+    // Saat ini hanya ada autentikasi tiruan. Selama "mock", layar auth & Catat cepat menampilkan pita MODE PROTOTIPE.
+    AUTH_MODE: z.enum(["mock"]).default("mock"),
   })
   .superRefine((env, ctx) => {
     if (env.DATA_SOURCE === "api" && !env.API_BASE_URL) {

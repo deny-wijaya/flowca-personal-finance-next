@@ -80,6 +80,7 @@ describe("HttpTransactionRepository", () => {
       amount: 2_000_000,
       category: "Freelance",
       note: "Landing page klien",
+      accountId: "bank",
       occurredAt: new Date("2026-11-08T00:00:00.000Z"),
     });
 
@@ -90,6 +91,7 @@ describe("HttpTransactionRepository", () => {
       amount: 2_000_000,
       category: "Freelance",
       note: "Landing page klien",
+      account_id: "bank",
       occurred_at: "2026-11-08T00:00:00.000Z",
     });
   });

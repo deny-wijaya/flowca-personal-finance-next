@@ -9,70 +9,56 @@ import { transactionFormSchema } from "./transaction-form-schema";
 
 export type CreateTransactionState =
   | { status: "idle" }
-  | { status: "success"; message: string }
-  | {
-      status: "error";
-      message: string;
-      fieldErrors?: Record<string, string[] | undefined>;
-      /** Nilai yang tadi diisi user, supaya form tidak kosong lagi setelah gagal. */
-      values?: Record<string, string>;
-    };
+  | { status: "success"; savedAt: number }
+  | { status: "error"; message: string; fieldErrors?: Record<string, string[] | undefined> };
 
 /**
- * Server Action untuk form "Tambah Transaksi".
+ * Server Action untuk layar "Tambah transaksi".
  * Action sengaja dibuat tipis: validasi input, panggil use case, terjemahkan error.
+ * Form-nya client component yang memegang nilai sendiri, jadi tidak perlu mengembalikan `values`.
  */
-export async function createTransactionAction(
-  _prevState: CreateTransactionState,
-  formData: FormData,
-): Promise<CreateTransactionState> {
-  const values = {
-    type: String(formData.get("type") ?? ""),
+export async function createTransactionAction(_prev: CreateTransactionState, formData: FormData): Promise<CreateTransactionState> {
+  const parsed = transactionFormSchema.safeParse({
+    type: formData.get("type"),
     amount: String(formData.get("amount") ?? ""),
-    category: String(formData.get("category") ?? ""),
-    occurredAt: String(formData.get("occurredAt") ?? ""),
-    note: String(formData.get("note") ?? ""),
-  };
-
-  const parsed = transactionFormSchema.safeParse({ ...values, note: values.note || undefined });
+    category: formData.get("category") || undefined,
+    accountId: formData.get("accountId") ?? "",
+    toAccountId: formData.get("toAccountId") || undefined,
+    date: formData.get("date"),
+    time: formData.get("time"),
+    note: formData.get("note") || undefined,
+  });
 
   if (!parsed.success) {
-    return {
-      status: "error",
-      message: "Periksa kembali isian form.",
-      fieldErrors: z.flattenError(parsed.error).fieldErrors,
-      values,
-    };
+    return { status: "error", message: "Periksa kembali isian form.", fieldErrors: z.flattenError(parsed.error).fieldErrors };
   }
 
-  const { occurredAt, ...rest } = parsed.data;
+  const input = parsed.data;
+  if (input.type === "tf") {
+    // TODO(transaction): domain belum punya jenis transfer antar akun.
+    return { status: "error", message: "Transfer antar akun belum tersedia. Catat sebagai pengeluaran dan pemasukan dulu, ya." };
+  }
 
   try {
     await container.createTransaction().execute({
-      ...rest,
-      occurredAt: new Date(`${occurredAt}T00:00:00`),
+      type: input.type === "in" ? "income" : "expense",
+      amount: input.amount,
+      category: input.category!,
+      note: input.note,
+      accountId: input.accountId,
+      occurredAt: new Date(`${input.date}T${input.time}`),
     });
   } catch (error) {
     if (error instanceof ValidationError) {
-      return {
-        status: "error",
-        message: error.message,
-        fieldErrors: error.field ? { [error.field]: [error.message] } : undefined,
-        values,
-      };
+      return { status: "error", message: error.message, fieldErrors: error.field ? { [error.field]: [error.message] } : undefined };
     }
     if (error instanceof HttpError) {
       console.error("[createTransactionAction]", error.status, error.code, error.message);
-      return {
-        status: "error",
-        message: error.status >= 400 && error.status < 500 ? error.message : "Server sedang bermasalah, coba lagi nanti.",
-        values,
-      };
+      return { status: "error", message: error.status >= 400 && error.status < 500 ? error.message : "Server sedang bermasalah, coba lagi nanti." };
     }
     throw error;
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/transactions");
-  return { status: "success", message: "Transaksi berhasil disimpan." };
+  revalidatePath("/", "layout");
+  return { status: "success", savedAt: Date.now() };
 }
