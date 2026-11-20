@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next Personal Finance
 
-## Getting Started
+Web app pencatat pemasukan dan pengeluaran pribadi, dibangun dengan Next.js 16 (App Router) dan clean architecture. Kebutuhan produk lengkap ada di [`docs/PRD.md`](docs/PRD.md).
 
-First, run the development server:
+## Menjalankan
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # default DATA_SOURCE=mock, tidak butuh backend
+npm run dev                  # http://localhost:3200
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script | Fungsi |
+|---|---|
+| `npm run dev` | Development server di port 3200 |
+| `npm run build` / `npm start` | Build dan jalankan production |
+| `npm run lint` | ESLint, termasuk aturan batas antar layer |
+| `npm run typecheck` | Cek tipe TypeScript |
+| `npm test` | Unit test dengan Vitest |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Menghubungkan ke backend API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ubah `.env.local` seperti ini, lalu restart server. Tidak ada kode yang perlu diubah.
 
-## Learn More
+```env
+DATA_SOURCE=api
+API_BASE_URL=http://localhost:4000/api/v1
+```
 
-To learn more about Next.js, take a look at the following resources:
+Kontrak endpoint dan format response yang diharapkan ada di PRD bagian 8.4. Request ke backend hanya dilakukan dari server (Server Component dan Server Action), jadi `API_BASE_URL` dan token tidak pernah terkirim ke browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Struktur folder
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                         # Routing saja: page, layout, error, loading
+│   └── (main)/                  # Grup halaman yang memakai navigasi utama
+│       ├── dashboard/page.tsx
+│       └── transactions/page.tsx
+├── modules/
+│   └── transaction/
+│       ├── domain/              # Entity, aturan bisnis, interface repository
+│       ├── application/         # Use case
+│       ├── infrastructure/      # Repository HTTP & mock, DTO + mapper
+│       └── presentation/        # Komponen, section async, Server Action
+├── shared/
+│   ├── config/env.ts            # Validasi env (server-only)
+│   ├── domain/errors.ts         # DomainError, ValidationError
+│   ├── infrastructure/http/     # HttpClient & HttpError
+│   ├── lib/format.ts            # Format Rupiah dan tanggal
+│   └── ui/                      # Komponen UI generik
+└── di/container.ts              # Composition root: memilih mock atau API
+```
 
-## Deploy on Vercel
+## Menambah fitur baru (contoh: Budget)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Buat `src/modules/budget/domain/` berisi entity `Budget` dan interface `BudgetRepository`.
+2. Buat use case di `application/`, misalnya `GetBudgetProgress`, beserta unit test-nya dengan repository in-memory.
+3. Buat `InMemoryBudgetRepository` dan `HttpBudgetRepository` di `infrastructure/`, lengkap dengan schema DTO zod.
+4. Daftarkan use case di `src/di/container.ts`.
+5. Buat komponen dan section di `presentation/`, lalu page di `src/app/(main)/budgets/page.tsx`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+ESLint akan menolak import yang melanggar arah dependency, misalnya komponen yang meng-import repository HTTP secara langsung.
