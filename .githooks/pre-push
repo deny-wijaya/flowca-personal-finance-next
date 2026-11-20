@@ -1,0 +1,5 @@
+#!/bin/sh
+# Menolak push kalau typecheck, lint (aturan layer), atau test (termasuk architecture test) gagal.
+# Build tidak dijalankan di sini supaya push tetap cepat; build dicek di CI.
+echo "pre-push: typecheck, lint, test..."
+npm run --silent typecheck && npm run --silent lint && npm test --silent

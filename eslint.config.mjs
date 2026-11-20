@@ -83,6 +83,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    // Env hanya dibaca dan divalidasi di satu tempat.
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/shared/config/env.ts", "**/*.test.ts"],
+    rules: {
+      "no-restricted-properties": [
+        "error",
+        { object: "process", property: "env", message: "Baca env lewat `env` dari @/shared/config/env, bukan process.env." },
+      ],
+    },
+  },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);
 
