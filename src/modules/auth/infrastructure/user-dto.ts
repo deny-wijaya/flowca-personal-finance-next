@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { UserProfile } from "../domain/user";
 
 /**
- * Bentuk data user sesuai kontrak backend (`express-personal-finance/docs/API-CONTRACT.md` bagian 4.1).
+ * Bentuk data auth sesuai kontrak backend (`express-personal-finance/docs/API-CONTRACT.md` bagian 4.1 dan 4.2).
  * Kalau backend mengubah format, cukup ubah file ini. Domain dan UI tidak ikut berubah.
  */
 export const userDtoSchema = z.object({
@@ -23,6 +23,12 @@ export function toUserProfile(dto: UserDto): UserProfile {
 export function toRegisterBody(input: { name: string; email: string; password: string }) {
   return { name: input.name, email: input.email, password: input.password };
 }
+
+/** Response `POST /auth/login`. */
+export const accessTokenDtoSchema = z.object({
+  access_token: z.string().min(1),
+  expires_in: z.number().int().positive(),
+});
 
 /** `details` dari error 400/409 backend: `{ fieldErrors: { email: ["..."] } }`. */
 const fieldErrorsDetailsSchema = z.object({

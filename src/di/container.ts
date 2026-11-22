@@ -20,13 +20,15 @@ import {
 } from "@/modules/transaction/infrastructure/in-memory-transaction-repository";
 import { env } from "@/shared/config/env";
 import { HttpClient } from "@/shared/infrastructure/http/http-client";
+import { createAccessTokenCookie } from "@/shared/infrastructure/session/access-token-cookie";
 
 /**
  * Composition root: satu-satunya tempat yang memilih implementasi konkret.
  * Ganti DATA_SOURCE=mock ke DATA_SOURCE=api di .env.local, dan transaksi
  * otomatis memakai backend tanpa mengubah use case maupun komponen.
  *
- * Auth: AUTH_MODE=api membuat register memanggil backend; method auth lain masih tiruan.
+ * Auth: AUTH_MODE=api membuat register, login email, dan keluar memanggil backend.
+ * Token disimpan di cookie httpOnly dan dikirim ke backend di setiap request lewat HttpClient.
  * Akun, anggaran, dan parser Catat cepat belum punya endpoint backend,
  * jadi untuk sementara selalu memakai implementasi in-memory / tiruan.
  */
@@ -34,12 +36,14 @@ import { HttpClient } from "@/shared/infrastructure/http/http-client";
 // Disimpan di globalThis supaya data mock tidak ter-reset setiap hot reload saat development.
 const globalForMock = globalThis as unknown as { mockTransactionRepository?: InMemoryTransactionRepository };
 
+const accessTokenCookie = createAccessTokenCookie({ secure: env.NODE_ENV === "production" });
+
 function getHttpClient() {
   return new HttpClient({
     baseUrl: env.API_BASE_URL!,
     timeoutMs: env.API_TIMEOUT_MS,
-    // TODO(auth): isi dengan pembacaan token dari cookie saat fitur login dibuat.
-    getAccessToken: async () => undefined,
+    // Token dari cookie httpOnly dikirim sebagai header Authorization: Bearer <token>.
+    getAccessToken: () => accessTokenCookie.read(),
   });
 }
 
@@ -56,7 +60,7 @@ const budgetRepository = new InMemoryBudgetRepository();
 const mockAuthGateway = new MockAuthGateway();
 
 function getAuthGateway(): AuthGateway {
-  return env.AUTH_MODE === "api" ? new HttpAuthGateway(getHttpClient(), mockAuthGateway) : mockAuthGateway;
+  return env.AUTH_MODE === "api" ? new HttpAuthGateway(getHttpClient(), mockAuthGateway, accessTokenCookie) : mockAuthGateway;
 }
 const quickEntryParser = new RuleBasedQuickEntryParser();
 const receiptReader = new MockReceiptReader();

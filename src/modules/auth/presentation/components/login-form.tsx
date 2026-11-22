@@ -89,6 +89,8 @@ export function LoginForm({ variant }: { variant: "mobile" | "desktop" }) {
         <Button type="submit" tone="coral" size={desktop ? 56 : 54} font={desktop ? "display-lg" : "display"} block disabled={pending} className="tracking-[0.02em]">
           {pending ? "Memeriksa…" : "Masuk"}
         </Button>
+        {/* Error yang bukan milik satu field, misalnya backend sedang mati. */}
+        {errors.form && <Notice tone="error">{errors.form}</Notice>}
         {state.status === "prototype" && (
           <Notice tone="note" size={desktop ? "lg" : "sm"} className={cn(!desktop && "flex flex-col gap-1")}>
             <span>Prototipe: login email belum terhubung ke server{desktop ? ". " : ", jadi tidak ada sesi asli yang dibuat."}</span>
