@@ -53,7 +53,7 @@ File lain di `presentation/` hanya `actions.ts` (Server Action) dan schema form.
 
 ## Struktur folder yang dikunci
 
-- `src/` hanya berisi `app/`, `di/`, `modules/`, `shared/`.
+- `src/` hanya berisi `app/`, `di/`, `modules/`, `shared/`, dan `proxy.ts`. Proxy (dulu bernama middleware) hanya melakukan pengecekan cepat cookie login sebelum halaman dirender; pemeriksaan token yang sesungguhnya tetap di backend.
 - `src/shared/` hanya berisi `config/`, `domain/`, `infrastructure/`, `lib/`, `ui/`.
 - Setiap modul hanya berisi folder `domain/`, `application/`, `infrastructure/`, `presentation/`. Modul boleh tidak punya semua layer (misalnya `dashboard` hanya punya `presentation`).
 

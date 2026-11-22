@@ -153,3 +153,16 @@ describe("HttpAuthGateway.signInWithPassword", () => {
     expect(saved.cleared).toBe(true);
   });
 });
+
+describe("HttpAuthGateway.currentUser", () => {
+  it("memanggil GET /auth/me dan memetakan UserDto ke UserProfile", async () => {
+    const { fetchMock, gateway } = setup(async () =>
+      jsonResponse({ data: { id: "usr_1", name: "Rani Putri", email: "rani@email.com", created_at: "2026-11-21T03:00:00.000Z" } }),
+    );
+
+    expect(await gateway.currentUser()).toEqual({ id: "usr_1", name: "Rani Putri", email: "rani@email.com", signInMethod: "email" });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("https://api.example.test/api/v1/auth/me");
+    expect(init?.method).toBe("GET");
+  });
+});

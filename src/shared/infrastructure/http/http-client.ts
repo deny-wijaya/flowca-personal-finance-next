@@ -6,6 +6,12 @@ export type HttpClientConfig = {
   timeoutMs: number;
   /** Disiapkan untuk auth: nanti diisi fungsi yang membaca token dari cookie. */
   getAccessToken?: () => Promise<string | undefined>;
+  /**
+   * Dipanggil saat backend membalas 401 UNAUTHORIZED (token tidak ada, palsu, atau kedaluwarsa).
+   * Container mengisinya dengan redirect ke /auth/expired, yang menghapus cookie lalu membuka Login.
+   * 401 INVALID_CREDENTIALS (password salah saat login) tidak memicu ini.
+   */
+  onUnauthorized?: () => never;
 };
 
 type QueryValue = string | number | boolean | undefined;
@@ -71,6 +77,7 @@ export class HttpClient {
       const parsedError = apiErrorSchema.safeParse(json);
       if (parsedError.success) {
         const { code, message, details } = parsedError.data.error;
+        if (response.status === 401 && code === "UNAUTHORIZED") this.config.onUnauthorized?.();
         throw new HttpError(message, response.status, code, details);
       }
       throw new HttpError(`Request gagal (${response.status})`, response.status);

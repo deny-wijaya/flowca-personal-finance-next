@@ -25,6 +25,14 @@ const envSchema = z
         message: "API_BASE_URL wajib diisi jika DATA_SOURCE=api atau AUTH_MODE=api",
       });
     }
+    // Endpoint transaksi di backend wajib login, jadi data dari API butuh token dari login sungguhan.
+    if (env.DATA_SOURCE === "api" && env.AUTH_MODE !== "api") {
+      ctx.addIssue({
+        code: "custom",
+        path: ["AUTH_MODE"],
+        message: "AUTH_MODE wajib api jika DATA_SOURCE=api (endpoint transaksi butuh token login)",
+      });
+    }
   });
 
 const parsed = envSchema.safeParse(process.env);
