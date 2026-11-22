@@ -8,18 +8,21 @@ import { z } from "zod";
  */
 const envSchema = z
   .object({
+    // Diisi otomatis oleh Next: "development" saat `next dev`, "production" saat `next build`/`next start`.
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     DATA_SOURCE: z.enum(["mock", "api"]).default("mock"),
     API_BASE_URL: z.url().optional(),
     API_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
-    // Saat ini hanya ada autentikasi tiruan. Selama "mock", layar auth & Catat cepat menampilkan pita MODE PROTOTIPE.
-    AUTH_MODE: z.enum(["mock"]).default("mock"),
+    // "mock": autentikasi tiruan, layar auth & Catat cepat menampilkan pita MODE PROTOTIPE.
+    // "api": register, login email, dan keluar memanggil backend; Google dan reset password masih tiruan.
+    AUTH_MODE: z.enum(["mock", "api"]).default("mock"),
   })
   .superRefine((env, ctx) => {
-    if (env.DATA_SOURCE === "api" && !env.API_BASE_URL) {
+    if ((env.DATA_SOURCE === "api" || env.AUTH_MODE === "api") && !env.API_BASE_URL) {
       ctx.addIssue({
         code: "custom",
         path: ["API_BASE_URL"],
-        message: "API_BASE_URL wajib diisi jika DATA_SOURCE=api",
+        message: "API_BASE_URL wajib diisi jika DATA_SOURCE=api atau AUTH_MODE=api",
       });
     }
   });

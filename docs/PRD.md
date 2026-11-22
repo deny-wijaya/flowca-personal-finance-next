@@ -292,44 +292,11 @@ presentation  ──►  application  ──►  domain  ◄──  infrastructu
 - **Menulis data:** Form (Client Component, `useActionState`) → Server Action `createTransactionAction` → validasi zod → use case → repository → `revalidatePath('/dashboard')` dan `revalidatePath('/transactions')`.
 - **Caching:** data keuangan bersifat per pengguna, jadi tidak memakai `"use cache"`. Setiap section memanggil `connection()` dan dibungkus `<Suspense>`, sehingga kerangka halaman tampil instan dan data di-stream.
 
-### 8.4 Kontrak API (usulan untuk backend)
+### 8.4 Kontrak API
 
-Base URL diatur lewat `API_BASE_URL`, contohnya `http://localhost:4000/api/v1`. Semua response memakai envelope berikut.
+Kontrak API (envelope response, kode error, daftar endpoint, dan detail request/response) ada di satu file bersama di repo backend: [`express-personal-finance/docs/API-CONTRACT.md`](../../express-personal-finance/docs/API-CONTRACT.md). PRD ini tidak menyalin isinya supaya tidak ada dua versi yang berbeda.
 
-**Sukses**
-
-```json
-{ "data": { } }
-```
-
-**Error**
-
-```json
-{ "error": { "code": "VALIDATION_ERROR", "message": "Kategori tidak dikenal", "details": {} } }
-```
-
-**Endpoint MVP**
-
-| Method | Path | Query / Body | Response `data` |
-|---|---|---|---|
-| `GET` | `/transactions` | `from`, `to` (ISO 8601), `type` (`income` / `expense`), semuanya opsional | `TransactionDto[]` |
-| `POST` | `/transactions` | `{ type, amount, category, note, occurred_at }` | `TransactionDto` (status `201`) |
-| `PATCH` | `/transactions/:id` | field yang diubah | `TransactionDto` (fase A3) |
-| `DELETE` | `/transactions/:id` | - | status `204` (fase A3) |
-| `POST` | `/auth/login` | `{ email, password }` | `{ access_token, expires_in }` (fase C1) |
-
-**`TransactionDto`**
-
-```json
-{
-  "id": "trx_01HF...",
-  "type": "expense",
-  "amount": 64000,
-  "category": "Transportasi",
-  "note": "Gojek ke kantor",
-  "occurred_at": "2026-11-06T02:00:00.000Z"
-}
-```
+Base URL diatur lewat `API_BASE_URL`, contohnya `http://localhost:4000/api/v1`.
 
 Response yang tidak sesuai schema ditolak dengan `HttpError` kode `INVALID_RESPONSE`, sehingga perubahan kontrak di backend langsung ketahuan dan tidak diam-diam merusak UI. Jika backend memakai format lain, yang perlu diubah hanya `transaction-dto.ts`.
 
@@ -384,7 +351,7 @@ Env divalidasi dengan zod di `src/shared/config/env.ts` saat server start. Konfi
 
 | Risiko | Dampak | Mitigasi |
 |---|---|---|
-| Kontrak API backend berbeda dari usulan | Integrasi tertunda | Kontrak di bagian 8.4 disepakati dulu. Perbedaan format cukup ditangani di file DTO/mapper |
+| Kontrak API backend berbeda dari usulan | Integrasi tertunda | Kontrak di `API-CONTRACT.md` (lihat bagian 8.4) disepakati dulu. Perbedaan format cukup ditangani di file DTO/mapper |
 | Perbedaan zona waktu server dan pengguna | Transaksi jam 00.00-07.00 WIB bisa masuk tanggal sebelumnya | Sepakati zona waktu (lihat pertanyaan terbuka). Kirim tanggal dengan offset atau sebagai `YYYY-MM-DD` |
 | Data mock hilang saat server restart | Data uji hilang | Hanya untuk development. Pakai `DATA_SOURCE=api` untuk data yang perlu disimpan |
 | Pengguna berhenti mencatat setelah minggu pertama | North Star tidak tercapai | Form dibuat sesingkat mungkin. Pertimbangkan pengingat harian di fase 2 |
@@ -396,7 +363,7 @@ Env divalidasi dengan zod di `src/shared/config/env.ts` saat server start. Konfi
 
 **Dependensi**
 
-- Backend REST API yang mengikuti kontrak di bagian 8.4, dibangun di repo `express-personal-finance` (Fase 0 selesai, data masih in-memory).
+- Backend REST API yang mengikuti kontrak di `express-personal-finance/docs/API-CONTRACT.md`, dibangun di repo `express-personal-finance` (Fase 0 selesai, data masih in-memory).
 - Layanan auth di backend untuk fase C1.
 
 **Asumsi**

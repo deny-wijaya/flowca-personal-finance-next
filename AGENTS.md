@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Project rules
 
-- Read `docs/PRD.md` for scope and the API contract (section 8.4) before adding features.
+- Read `docs/PRD.md` for scope before adding features. The API contract lives only in `../express-personal-finance/docs/API-CONTRACT.md`; keep `src/modules/*/infrastructure/*-dto.ts` in sync with it.
 - The architecture contract is `docs/ARCHITECTURE.md`. It is enforced by `eslint.config.mjs` and `src/architecture.test.ts`; never weaken those to make a change pass.
 - Clean architecture per module in `src/modules/<feature>/{domain,application,infrastructure,presentation}`. Dependencies point inward only; `eslint.config.mjs` enforces this with `no-restricted-imports`.
 - Only `src/shared/config/env.ts` reads `process.env`. Only `src/di/container.ts` picks concrete implementations (`DATA_SOURCE=mock|api`).
