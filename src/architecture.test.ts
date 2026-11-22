@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 const SRC = path.resolve(import.meta.dirname);
 const LAYERS = ["domain", "application", "infrastructure", "presentation"] as const;
 const PRESENTATION_DIRS = ["components", "screens", "view-models"];
-const TOP_LEVEL = ["app", "di", "modules", "shared", "architecture.test.ts"];
+const TOP_LEVEL = ["app", "di", "modules", "shared", "proxy.ts", "architecture.test.ts"];
 const SHARED_DIRS = ["config", "domain", "infrastructure", "lib", "ui"];
 
 const isIgnored = (name: string) => name.startsWith(".");
@@ -51,7 +51,7 @@ const dirs = (dir: string) =>
   fs.readdirSync(dir, { withFileTypes: true }).filter((e) => !isIgnored(e.name));
 
 describe("struktur folder", () => {
-  it("src/ hanya berisi app, di, modules, shared", () => {
+  it("src/ hanya berisi app, di, modules, shared, dan proxy.ts", () => {
     const extra = dirs(SRC).map((e) => e.name).filter((n) => !TOP_LEVEL.includes(n));
     expect(extra, "Folder baru di src/ harus masuk ke salah satu folder yang sudah ada").toEqual([]);
   });

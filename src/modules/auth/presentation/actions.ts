@@ -64,6 +64,9 @@ export async function registerAction(_prev: RegisterState, formData: FormData): 
 
   try {
     const user = await container.auth().register({ name, email, password });
+    // Langsung masuk setelah daftar, supaya tombol "Mulai onboarding" tidak dilempar ke layar Login.
+    // Di mode tiruan, hasilnya "prototype" dan tidak ada sesi yang dibuat.
+    await container.auth().signInWithPassword({ email, password, remember: true });
     return { status: "success", firstName: firstName(user.name) ?? "teman" };
   } catch (error) {
     return { status: "error", fieldErrors: toFieldErrors(error) };

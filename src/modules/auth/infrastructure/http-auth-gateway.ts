@@ -8,8 +8,8 @@ import { accessTokenDtoSchema, toFieldMessages, toRegisterBody, toUserProfile, u
 
 /**
  * Gateway auth yang memanggil backend (dipakai saat AUTH_MODE=api).
- * Register, login dengan email, dan keluar sudah memakai backend. Method lain (Google, reset password,
- * profil user) diteruskan ke `fallback` (gateway tiruan) sampai endpoint-nya dibuat.
+ * Register, login dengan email, profil user, dan keluar sudah memakai backend. Method lain (Google,
+ * reset password) diteruskan ke `fallback` (gateway tiruan) sampai endpoint-nya dibuat.
  */
 export class HttpAuthGateway implements AuthGateway {
   constructor(
@@ -55,8 +55,10 @@ export class HttpAuthGateway implements AuthGateway {
     }
   }
 
-  currentUser() {
-    return this.fallback.currentUser();
+  /** Profil user pemilik token di cookie (`GET /auth/me`). Dipakai kartu profil dan sapaan Catat cepat. */
+  async currentUser(): Promise<UserProfile> {
+    const dto = await this.http.request("/auth/me", { schema: userDtoSchema });
+    return toUserProfile(dto);
   }
   signInWithGoogle() {
     return this.fallback.signInWithGoogle();

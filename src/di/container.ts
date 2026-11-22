@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { GetAccountBalances } from "@/modules/account/application/get-account-balances";
 import { InMemoryAccountRepository } from "@/modules/account/infrastructure/in-memory-account-repository";
 import { AuthUseCases } from "@/modules/auth/application/auth-use-cases";
@@ -44,6 +45,8 @@ function getHttpClient() {
     timeoutMs: env.API_TIMEOUT_MS,
     // Token dari cookie httpOnly dikirim sebagai header Authorization: Bearer <token>.
     getAccessToken: () => accessTokenCookie.read(),
+    // Token ditolak backend: hapus cookie lewat Route Handler /auth/expired, lalu ke Login.
+    onUnauthorized: () => redirect("/auth/expired"),
   });
 }
 
