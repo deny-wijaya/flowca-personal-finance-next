@@ -151,7 +151,7 @@ npm run dev
 
 Open http://localhost:3200. `DATA_SOURCE` defaults to `mock`, so the app comes with sample data and doesn't need a backend.
 
-To use a real backend, change `.env.local` as shown below and restart the server. No code changes are needed. The endpoint contract is in [`docs/PRD.md`](docs/PRD.md), section 8.4.
+To use a real backend, change `.env.local` as shown below and restart the server. No code changes are needed. The endpoint contract is in [`express-personal-finance/docs/API-CONTRACT.md`](../express-personal-finance/docs/API-CONTRACT.md).
 
 ```env
 DATA_SOURCE=api

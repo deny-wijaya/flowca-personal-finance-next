@@ -75,6 +75,12 @@ export function RegisterForm() {
             </span>
           </label>
           {errors.terms && <div className={cn(fieldMessageClass, "-mt-1.5 text-danger")}>{errors.terms}</div>}
+          {/* Error yang bukan milik satu field, misalnya backend sedang mati. */}
+          {errors.form && (
+            <div role="alert" className={cn(fieldMessageClass, "text-danger")}>
+              {errors.form}
+            </div>
+          )}
 
           <Button type="submit" tone="orange" size={54} block disabled={pending} className="mt-0.5">
             {pending ? "Membuat akun…" : "Buat akun"}
