@@ -11,8 +11,9 @@ import {
   signedAmount,
   calendarDayDiff,
 } from "@/shared/lib/format";
-import { isSameMonth, shiftMonth, toMonthParam, type MonthRef } from "@/shared/lib/month";
-import type { Transaction } from "../../domain/transaction";
+import { isSameMonth, monthRange, parseMonthParam, shiftMonth, toMonthParam, type MonthRef } from "@/shared/lib/month";
+import { TRANSACTION_CATEGORIES, type Transaction } from "../../domain/transaction";
+import type { TransactionFilter, TransactionTotals } from "../../domain/transaction-repository";
 import { categoryInitial, categoryTone } from "./category-tone";
 
 export type Direction = "in" | "out";
@@ -34,6 +35,10 @@ export type TransactionRowVM = {
   time: string;
   /** "Hari ini" / "Kemarin" / "Kam, 19 Nov" */
   relativeDay: string;
+  /** Kunci hari kalender untuk mengelompokkan baris per hari, "2026-11-19". */
+  dayKey: string;
+  /** Judul grup hari di daftar mobile: "Hari ini · Kam, 19 Nov" atau "Sen, 16 Nov". */
+  dayGroupLabel: string;
   /** Nilai mentah untuk urut/filter di tabel interaktif. */
   sortTime: number;
   sortAmount: number;
@@ -47,6 +52,8 @@ export type TransactionContext = {
 
 export function toTransactionRow(trx: Transaction, { now, accountNames }: TransactionContext): TransactionRowVM {
   const signed = trx.type === "income" ? trx.amount : -trx.amount;
+  const relative = relativeDayName(trx.occurredAt, now);
+  const day = formatShortDay(trx.occurredAt);
   return {
     id: trx.id,
     name: trx.note || trx.category,
@@ -58,7 +65,9 @@ export function toTransactionRow(trx: Transaction, { now, accountNames }: Transa
     direction: trx.type === "income" ? "in" : "out",
     dayLabel: formatShortDay(trx.occurredAt),
     time: formatTime(trx.occurredAt),
-    relativeDay: relativeDayName(trx.occurredAt, now) ?? formatShortDay(trx.occurredAt),
+    relativeDay: relative ?? day,
+    dayKey: formatDate(trx.occurredAt),
+    dayGroupLabel: relative ? `${relative} · ${day}` : day,
     sortTime: trx.occurredAt.getTime(),
     sortAmount: signed,
   };
@@ -88,37 +97,32 @@ export type DayGroupVM = {
   rows: (TransactionRowVM & { meta: string })[];
 };
 
-/** Kelompokkan transaksi (sudah terurut terbaru di atas) per hari kalender. */
-export function groupByDay(transactions: Transaction[], ctx: TransactionContext): DayGroupVM[] {
-  const groups: { key: string; date: Date; total: number; rows: DayGroupVM["rows"] }[] = [];
-  for (const trx of transactions) {
-    const key = formatDate(trx.occurredAt);
+/**
+ * Kelompokkan baris (sudah terurut terbaru di atas) per hari kalender.
+ * Bekerja dengan baris yang sudah terformat, jadi bisa dipanggil ulang di browser
+ * setiap kali halaman berikutnya dimuat lewat tombol "Muat lebih banyak".
+ */
+export function groupRows(rows: TransactionRowVM[]): DayGroupVM[] {
+  const groups: DayGroupVM[] = [];
+  const totals: number[] = [];
+  for (const row of rows) {
     let group = groups.at(-1);
-    if (!group || group.key !== key) {
-      group = { key, date: trx.occurredAt, total: 0, rows: [] };
+    if (!group || group.key !== row.dayKey) {
+      group = { key: row.dayKey, label: row.dayGroupLabel, sum: "", rows: [] };
       groups.push(group);
+      totals.push(0);
     }
-    const row = toTransactionRow(trx, ctx);
-    group.total += row.sortAmount;
+    totals[totals.length - 1] += row.sortAmount;
     group.rows.push({ ...row, meta: rowMetaWithTime(row) });
   }
-  return groups.map((group) => {
-    const relative = relativeDayName(group.date, ctx.now);
-    const day = formatShortDay(group.date);
-    return { key: group.key, label: relative ? `${relative} · ${day}` : day, sum: signedAmount(group.total), rows: group.rows };
-  });
+  return groups.map((group, index) => ({ ...group, sum: signedAmount(totals[index]) }));
 }
 
 export type SummaryStripVM = { totalIn: string; totalOut: string; net: string };
 
-export function toSummaryStrip(transactions: Transaction[]): SummaryStripVM {
-  let income = 0;
-  let expense = 0;
-  for (const trx of transactions) {
-    if (trx.type === "income") income += trx.amount;
-    else expense += trx.amount;
-  }
-  return { totalIn: formatRupiah(income), totalOut: formatRupiah(expense), net: netAmount(income - expense) };
+/** Total dari GET /summary, bukan dari daftar transaksi yang baru dimuat sebagian. */
+export function toSummaryStrip(totals: Pick<TransactionTotals, "totalIncome" | "totalExpense" | "netCashflow">): SummaryStripVM {
+  return { totalIn: formatRupiah(totals.totalIncome), totalOut: formatRupiah(totals.totalExpense), net: netAmount(totals.netCashflow) };
 }
 
 export type MonthNavVM = {
@@ -158,11 +162,61 @@ export const TYPE_FILTERS: { id: TypeFilter; label: string }[] = [
   { id: "in", label: "Pemasukan" },
 ];
 
-/** Filter klien: jenis + kata kunci di nama/kategori (tidak peka huruf besar). */
-export function matchesFilter(row: Pick<TransactionRowVM, "name" | "category" | "direction">, filter: { type: TypeFilter; query: string }) {
-  if (filter.type !== "all" && row.direction !== filter.type) return false;
-  const query = filter.query.trim().toLowerCase();
-  return !query || `${row.name} ${row.category}`.toLowerCase().includes(query);
+/** Semua kategori untuk filter Kategori di menu Transaksi. */
+export const ALL_CATEGORIES: readonly string[] = [...new Set([...TRANSACTION_CATEGORIES.expense, ...TRANSACTION_CATEGORIES.income])];
+
+/**
+ * Filter daftar di menu Transaksi. Disimpan di URL (`/transactions?month=2026-11&q=gojek&type=out`),
+ * supaya backend yang mencari dan memfilter, dan filternya tetap ada saat halaman di-refresh.
+ */
+export type TransactionListFilters = {
+  /** "2026-11" */
+  month: string;
+  /** Kata pencarian, "" kalau tidak mencari. */
+  q: string;
+  type: TypeFilter;
+  /** Nama kategori, "" untuk semua kategori. */
+  category: string;
+};
+
+type SearchParamValue = string | string[] | undefined;
+
+const MAX_QUERY_LENGTH = 100;
+
+export function parseTransactionFilters(params: Record<string, SearchParamValue>, now: Date): TransactionListFilters {
+  const first = (value: SearchParamValue) => (Array.isArray(value) ? value[0] : value) ?? "";
+  const type = first(params.type);
+  const category = first(params.category);
+  return {
+    month: toMonthParam(parseMonthParam(params.month, now)),
+    q: first(params.q).trim().slice(0, MAX_QUERY_LENGTH),
+    type: type === "in" || type === "out" ? type : "all",
+    category: ALL_CATEGORIES.includes(category) ? category : "",
+  };
+}
+
+/** true kalau ada filter selain bulan (untuk teks "Tidak ditemukan" dan footer tabel). */
+export function hasActiveFilter(filters: TransactionListFilters) {
+  return filters.q !== "" || filters.type !== "all" || filters.category !== "";
+}
+
+/** Filter URL menjadi filter domain untuk use case ListTransactions. */
+export function toTransactionFilter(filters: TransactionListFilters, now: Date): TransactionFilter {
+  return {
+    ...monthRange(parseMonthParam(filters.month, now)),
+    type: filters.type === "all" ? undefined : filters.type === "in" ? "income" : "expense",
+    category: filters.category || undefined,
+    q: filters.q || undefined,
+  };
+}
+
+/** URL menu Transaksi untuk filter tertentu. Nilai bawaan tidak ditulis supaya URL tetap pendek. */
+export function transactionsHref(filters: TransactionListFilters) {
+  const params = new URLSearchParams({ month: filters.month });
+  if (filters.q) params.set("q", filters.q);
+  if (filters.type !== "all") params.set("type", filters.type);
+  if (filters.category) params.set("category", filters.category);
+  return `/transactions?${params.toString()}`;
 }
 
 /** Total bertanda untuk sekumpulan baris (dipakai ulang setelah filter). */

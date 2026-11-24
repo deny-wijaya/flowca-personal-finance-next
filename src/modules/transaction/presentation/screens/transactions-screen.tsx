@@ -5,13 +5,17 @@ import { SummaryStrip } from "@/shared/ui/layout/summary-strip";
 import { Amount } from "../components/amount";
 import { TransactionTable } from "../components/transaction-table";
 import { TransactionsMobile } from "../components/transactions-mobile";
-import type { DayGroupVM, MonthNavVM, SummaryStripVM, TransactionRowVM } from "../view-models/transaction-view-model";
+import type { TransactionFirstPage } from "../components/use-transaction-list";
+import type { MonthNavVM, SummaryStripVM, TransactionListFilters } from "../view-models/transaction-view-model";
 
 export type TransactionsScreenVM = {
   monthNav: MonthNavVM;
   summary: SummaryStripVM;
-  groups: DayGroupVM[];
-  rows: TransactionRowVM[];
+  filters: TransactionListFilters;
+  /** Halaman pertama dari GET /transactions. Halaman berikutnya dimuat lewat tombol "Muat lebih banyak". */
+  firstPage: TransactionFirstPage;
+  /** Jumlah semua transaksi bulan ini, dari GET /summary. */
+  totalCount: number;
   categories: string[];
   accounts: string[];
 };
@@ -28,7 +32,7 @@ export function TransactionsScreen({ vm }: { vm: TransactionsScreenVM }) {
           </div>
           <SummaryStrip {...vm.summary} />
         </header>
-        <TransactionsMobile groups={vm.groups} />
+        <TransactionsMobile filters={vm.filters} firstPage={vm.firstPage} />
       </div>
 
       <div className="hidden flex-col gap-5 px-8 pt-7 pb-10 lg:flex">
@@ -56,7 +60,14 @@ export function TransactionsScreen({ vm }: { vm: TransactionsScreenVM }) {
           <SummaryCell label="SELISIH" value={vm.summary.net} direction="neutral" />
         </section>
 
-        <TransactionTable rows={vm.rows} categories={vm.categories} accounts={vm.accounts} monthLabel={vm.monthNav.label} />
+        <TransactionTable
+          filters={vm.filters}
+          firstPage={vm.firstPage}
+          totalCount={vm.totalCount}
+          categories={vm.categories}
+          accounts={vm.accounts}
+          monthLabel={vm.monthNav.label}
+        />
       </div>
     </>
   );

@@ -1,49 +1,23 @@
-import type { TransactionRepository } from "../domain/transaction-repository";
+import type { TransactionRepository, TransactionTotals } from "../domain/transaction-repository";
 
-export type MonthlySummary = {
+export type MonthlySummary = TransactionTotals & {
   year: number;
   /** 1 = Januari, 12 = Desember */
   month: number;
-  totalIncome: number;
-  totalExpense: number;
-  /** totalIncome - totalExpense, bisa negatif */
-  netCashflow: number;
-  /** Pengeluaran per kategori, diurutkan dari yang terbesar */
-  expenseByCategory: { category: string; amount: number }[];
 };
 
+/**
+ * Ringkasan satu bulan untuk menu Dashboard dan Transaksi.
+ * Penjumlahan dikerjakan backend (GET /summary), jadi frontend tidak perlu mengambil semua transaksi.
+ */
 export class GetMonthlySummary {
   constructor(private readonly repository: TransactionRepository) {}
 
   async execute({ year, month }: { year: number; month: number }): Promise<MonthlySummary> {
+    // Batas bulan memakai zona waktu server Next, lalu dikirim ke backend lengkap dengan offset-nya.
     const from = new Date(year, month - 1, 1);
     const to = new Date(year, month, 0, 23, 59, 59, 999);
-    const transactions = await this.repository.list({ from, to });
-
-    let totalIncome = 0;
-    let totalExpense = 0;
-    const expenseMap = new Map<string, number>();
-
-    for (const trx of transactions) {
-      if (trx.type === "income") {
-        totalIncome += trx.amount;
-      } else {
-        totalExpense += trx.amount;
-        expenseMap.set(trx.category, (expenseMap.get(trx.category) ?? 0) + trx.amount);
-      }
-    }
-
-    const expenseByCategory = [...expenseMap.entries()]
-      .map(([category, amount]) => ({ category, amount }))
-      .sort((a, b) => b.amount - a.amount);
-
-    return {
-      year,
-      month,
-      totalIncome,
-      totalExpense,
-      netCashflow: totalIncome - totalExpense,
-      expenseByCategory,
-    };
+    const totals = await this.repository.summarize({ from, to });
+    return { ...totals, year, month };
   }
 }

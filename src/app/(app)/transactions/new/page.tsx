@@ -5,7 +5,7 @@ import { container } from "@/di/container";
 import { AddTransactionSheet } from "@/modules/transaction/presentation/components/add-transaction-sheet";
 import { TransactionsScreen } from "@/modules/transaction/presentation/screens/transactions-screen";
 import { toDateInputValue, toTimeInputValue } from "@/shared/lib/format";
-import { parseMonthParam } from "@/shared/lib/month";
+import { parseTransactionFilters } from "@/modules/transaction/presentation/view-models/transaction-view-model";
 import { ScreenSkeleton } from "../../_components/screen-skeleton";
 import { loadTransactionsScreen } from "../load";
 
@@ -23,7 +23,7 @@ export default function NewTransactionPage() {
 async function NewTransactionContent() {
   await connection();
   const now = new Date();
-  const [vm, balances] = await Promise.all([loadTransactionsScreen(parseMonthParam(undefined, now), now), container.getAccountBalances().execute()]);
+  const [vm, balances] = await Promise.all([loadTransactionsScreen(parseTransactionFilters({}, now), now), container.getAccountBalances().execute()]);
   return (
     <>
       <div aria-hidden="true" className="hidden lg:block">

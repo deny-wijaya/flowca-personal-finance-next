@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TRANSACTION_TYPES, type NewTransaction, type Transaction } from "../domain/transaction";
+import type { TransactionTotals } from "../domain/transaction-repository";
 
 /**
  * Bentuk data transaksi sesuai kontrak backend API (snake_case, tanggal ISO string).
@@ -17,7 +18,28 @@ export const transactionDtoSchema = z.object({
 
 export type TransactionDto = z.infer<typeof transactionDtoSchema>;
 
-export const transactionListDtoSchema = z.array(transactionDtoSchema);
+/** Response GET /summary (API-CONTRACT.md bagian 4.5). */
+export const summaryDtoSchema = z.object({
+  total_income: z.number().int(),
+  total_expense: z.number().int(),
+  net_cashflow: z.number().int(),
+  transaction_count: z.number().int(),
+  income_count: z.number().int(),
+  expense_count: z.number().int(),
+  expense_by_category: z.array(z.object({ category: z.string(), amount: z.number().int() })),
+});
+
+export function toTransactionTotals(dto: z.infer<typeof summaryDtoSchema>): TransactionTotals {
+  return {
+    totalIncome: dto.total_income,
+    totalExpense: dto.total_expense,
+    netCashflow: dto.net_cashflow,
+    transactionCount: dto.transaction_count,
+    incomeCount: dto.income_count,
+    expenseCount: dto.expense_count,
+    expenseByCategory: dto.expense_by_category,
+  };
+}
 
 export function toTransaction(dto: TransactionDto): Transaction {
   return {

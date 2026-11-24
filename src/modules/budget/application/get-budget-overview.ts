@@ -31,13 +31,10 @@ export class GetBudgetOverview {
   async execute({ year, month }: { year: number; month: number }): Promise<BudgetOverview> {
     const from = new Date(year, month - 1, 1);
     const to = new Date(year, month, 0, 23, 59, 59, 999);
-    const [budgets, expenses] = await Promise.all([
-      this.budgets.listForMonth(year, month),
-      this.transactions.list({ from, to, type: "expense" }),
-    ]);
+    // Pengeluaran per kategori dijumlahkan oleh backend (GET /summary), bukan dari daftar transaksi.
+    const [budgets, totals] = await Promise.all([this.budgets.listForMonth(year, month), this.transactions.summarize({ from, to })]);
 
-    const spentByCategory = new Map<string, number>();
-    for (const trx of expenses) spentByCategory.set(trx.category, (spentByCategory.get(trx.category) ?? 0) + trx.amount);
+    const spentByCategory = new Map(totals.expenseByCategory.map((item) => [item.category, item.amount]));
 
     const items = budgets.map((budget) => {
       const spent = spentByCategory.get(budget.category) ?? 0;

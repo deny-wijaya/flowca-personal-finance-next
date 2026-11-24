@@ -6,32 +6,40 @@ import { CategoryTile, categoryPillVariants } from "@/shared/ui/primitives/categ
 import { Checkbox } from "@/shared/ui/primitives/checkbox";
 import { Chip } from "@/shared/ui/primitives/chip";
 import { fieldVariants } from "@/shared/ui/primitives/field.variants";
-import { matchesFilter, TYPE_FILTERS, type TransactionRowVM, type TypeFilter } from "../view-models/transaction-view-model";
+import { hasActiveFilter, TYPE_FILTERS, type TransactionListFilters, type TransactionRowVM } from "../view-models/transaction-view-model";
 import { Amount } from "./amount";
-import { SearchBox } from "./transactions-mobile";
+import { LoadMore, SearchBox } from "./transactions-mobile";
+import { useSearchQuery, useTransactionList, type TransactionFirstPage } from "./use-transaction-list";
 
 type SortKey = "date" | "amount";
 type SortDir = "asc" | "desc";
 
 type TransactionTableProps = {
-  rows: TransactionRowVM[];
+  filters: TransactionListFilters;
+  firstPage: TransactionFirstPage;
+  /** Jumlah semua transaksi di bulan ini (dari GET /summary), untuk footer tabel. */
+  totalCount: number;
   categories: string[];
   accounts: string[];
   /** "November 2026" untuk footer tabel. */
   monthLabel: string;
 };
 
-/** Tabel transaksi desktop: cari, filter jenis/kategori/akun, urut, dan pilih massal. */
-export function TransactionTable({ rows, categories, accounts, monthLabel }: TransactionTableProps) {
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState<TypeFilter>("all");
-  const [category, setCategory] = useState("");
+/**
+ * Tabel transaksi desktop: cari, filter jenis/kategori/akun, urut, dan pilih massal.
+ * Pencarian, jenis, dan kategori dikerjakan backend lewat URL. Filter akun dan urutan kolom
+ * hanya berlaku untuk baris yang sudah dimuat, karena backend belum menyimpan akun (Epic D).
+ */
+export function TransactionTable({ filters, firstPage, totalCount, categories, accounts, monthLabel }: TransactionTableProps) {
+  const list = useTransactionList(filters, firstPage);
+  const rows = list.rows;
+  const [query, setQuery] = useSearchQuery(filters.q, (q) => list.setFilters({ q }));
   const [account, setAccount] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "date", dir: "desc" });
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
 
   const shown = rows
-    .filter((row) => matchesFilter(row, { query, type }) && (!category || row.category === category) && (!account || row.account === account))
+    .filter((row) => !account || row.account === account)
     .sort((a, b) => {
       const diff = sort.key === "date" ? a.sortTime - b.sortTime : a.sortAmount - b.sortAmount;
       return sort.dir === "asc" ? diff : -diff;
@@ -75,12 +83,12 @@ export function TransactionTable({ rows, categories, accounts, monthLabel }: Tra
         </div>
         <div role="radiogroup" aria-label="Jenis" className="flex gap-1.5">
           {TYPE_FILTERS.map((filter) => (
-            <Chip key={filter.id} behavior="radio" selected={type === filter.id} onClick={() => setType(filter.id)} className="min-h-10.5">
+            <Chip key={filter.id} behavior="radio" selected={filters.type === filter.id} onClick={() => list.setFilters({ type: filter.id })} className="min-h-10.5">
               {filter.label}
             </Chip>
           ))}
         </div>
-        <FilterSelect label="Kategori" value={category} onChange={setCategory} options={categories} />
+        <FilterSelect label="Kategori" value={filters.category} onChange={(category) => list.setFilters({ category })} options={categories} />
         <FilterSelect label="Akun" value={account} onChange={setAccount} options={accounts} />
       </div>
 
@@ -99,7 +107,7 @@ export function TransactionTable({ rows, categories, accounts, monthLabel }: Tra
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border-3 border-ink bg-paper shadow-hard-3">
+      <div aria-busy={list.isFiltering} className="overflow-x-auto rounded-2xl border-3 border-ink bg-paper shadow-hard-3">
         <table className="w-full min-w-180 border-collapse text-14">
           <thead>
             <tr className="border-b-3 border-ink bg-orange-100 text-left">
@@ -154,9 +162,12 @@ export function TransactionTable({ rows, categories, accounts, monthLabel }: Tra
         </table>
         {shown.length === 0 && <div className="p-8 text-center text-15 text-ink-600">Tidak ada transaksi yang cocok dengan filter ini.</div>}
         <div className="border-t-3 border-ink px-4 py-3 text-13 text-ink-600">
-          Menampilkan {shown.length} dari {rows.length} transaksi · {monthLabel}
+          {hasActiveFilter(filters) || account
+            ? `Menampilkan ${shown.length} transaksi yang cocok · ${monthLabel}`
+            : `Menampilkan ${shown.length} dari ${totalCount} transaksi · ${monthLabel}`}
         </div>
       </div>
+      <LoadMore hasMore={list.hasMore} loading={list.isLoadingMore} error={list.error} onClick={list.loadMore} />
     </>
   );
 }

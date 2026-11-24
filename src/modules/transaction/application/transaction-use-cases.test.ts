@@ -33,7 +33,7 @@ describe("CreateTransaction", () => {
 
     expect(created.id).toBeTruthy();
     expect(created.note).toBeUndefined();
-    expect(await repo.list()).toHaveLength(1);
+    expect((await repo.list({}, { limit: 20 })).items).toHaveLength(1);
   });
 
   it.each([
@@ -55,7 +55,7 @@ describe("CreateTransaction", () => {
 
     await expect(promise).rejects.toBeInstanceOf(ValidationError);
     await expect(promise).rejects.toMatchObject({ field });
-    expect(await repo.list()).toHaveLength(0);
+    expect((await repo.list({}, { limit: 20 })).items).toHaveLength(0);
   });
 });
 
@@ -69,7 +69,22 @@ describe("ListTransactions", () => {
 
     const result = await new ListTransactions(repo).execute();
 
-    expect(result.map((t) => t.id)).toEqual(["b", "c", "a"]);
+    expect(result.items.map((t) => t.id)).toEqual(["b", "c", "a"]);
+    expect(result.nextCursor).toBeNull();
+  });
+
+  it("membagi per halaman dan nextCursor melanjutkan tanpa item dobel", async () => {
+    const repo = new InMemoryTransactionRepository(
+      ["a", "b", "c", "d", "e"].map((id, index) => trx({ id, occurredAt: new Date(2026, 10, index + 1) })),
+    );
+    const list = new ListTransactions(repo);
+
+    const first = await list.execute({}, { limit: 2 });
+    const second = await list.execute({}, { limit: 2, cursor: first.nextCursor! });
+    const third = await list.execute({}, { limit: 2, cursor: second.nextCursor! });
+
+    expect([first, second, third].flatMap((page) => page.items.map((t) => t.id))).toEqual(["e", "d", "c", "b", "a"]);
+    expect(third.nextCursor).toBeNull();
   });
 });
 
@@ -88,6 +103,7 @@ describe("GetMonthlySummary", () => {
     expect(summary.totalIncome).toBe(12_500_000);
     expect(summary.totalExpense).toBe(2_385_000);
     expect(summary.netCashflow).toBe(10_115_000);
+    expect(summary).toMatchObject({ year: 2026, month: 11, transactionCount: 4, incomeCount: 1, expenseCount: 3 });
     expect(summary.expenseByCategory).toEqual([
       { category: "Tagihan", amount: 2_300_000 },
       { category: "Makanan", amount: 85_000 },

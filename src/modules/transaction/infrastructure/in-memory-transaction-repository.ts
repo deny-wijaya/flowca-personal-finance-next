@@ -1,9 +1,11 @@
+import type { Page, PageRequest } from "@/shared/domain/pagination";
 import type { NewTransaction, Transaction } from "../domain/transaction";
-import type { TransactionFilter, TransactionRepository } from "../domain/transaction-repository";
+import type { DateRange, TransactionFilter, TransactionRepository, TransactionTotals } from "../domain/transaction-repository";
 
 /**
  * Implementasi repository tanpa backend (dipakai saat DATA_SOURCE=mock dan di unit test).
  * Data hanya disimpan di memori proses server, jadi hilang saat server restart.
+ * Perilakunya meniru backend: daftar per halaman (terbaru di atas) dan ringkasan yang dihitung di sini.
  */
 export class InMemoryTransactionRepository implements TransactionRepository {
   private transactions: Transaction[];
@@ -12,20 +14,70 @@ export class InMemoryTransactionRepository implements TransactionRepository {
     this.transactions = [...seed];
   }
 
-  async list(filter: TransactionFilter = {}): Promise<Transaction[]> {
-    return this.transactions.filter((trx) => {
-      const time = trx.occurredAt.getTime();
-      if (filter.from && time < filter.from.getTime()) return false;
-      if (filter.to && time > filter.to.getTime()) return false;
-      if (filter.type && trx.type !== filter.type) return false;
-      return true;
-    });
+  async list(filter: TransactionFilter, page: PageRequest): Promise<Page<Transaction>> {
+    const rows = this.matching(filter).sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime() || (a.id < b.id ? 1 : -1));
+    // Di mock, cursor cukup berisi posisi (offset) item berikutnya. Frontend tetap memperlakukannya sebagai teks.
+    const start = page.cursor ? Number(page.cursor) : 0;
+    const end = start + page.limit;
+    return { items: rows.slice(start, end), nextCursor: end < rows.length ? String(end) : null };
+  }
+
+  async summarize(range: DateRange): Promise<TransactionTotals> {
+    const rows = this.matching(range);
+    const expenseMap = new Map<string, number>();
+    let totalIncome = 0;
+    let totalExpense = 0;
+    let incomeCount = 0;
+    for (const trx of rows) {
+      if (trx.type === "income") {
+        totalIncome += trx.amount;
+        incomeCount += 1;
+      } else {
+        totalExpense += trx.amount;
+        expenseMap.set(trx.category, (expenseMap.get(trx.category) ?? 0) + trx.amount);
+      }
+    }
+    const expenseByCategory = [...expenseMap]
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category));
+    return {
+      totalIncome,
+      totalExpense,
+      netCashflow: totalIncome - totalExpense,
+      transactionCount: rows.length,
+      incomeCount,
+      expenseCount: rows.length - incomeCount,
+      expenseByCategory,
+    };
+  }
+
+  async netByAccount(): Promise<ReadonlyMap<string, number>> {
+    const delta = new Map<string, number>();
+    for (const trx of this.transactions) {
+      if (!trx.accountId) continue;
+      const signed = trx.type === "income" ? trx.amount : -trx.amount;
+      delta.set(trx.accountId, (delta.get(trx.accountId) ?? 0) + signed);
+    }
+    return delta;
   }
 
   async create(input: NewTransaction): Promise<Transaction> {
     const transaction: Transaction = { ...input, id: crypto.randomUUID() };
     this.transactions.push(transaction);
     return transaction;
+  }
+
+  private matching(filter: TransactionFilter): Transaction[] {
+    const q = filter.q?.trim().toLowerCase();
+    return this.transactions.filter((trx) => {
+      const time = trx.occurredAt.getTime();
+      if (filter.from && time < filter.from.getTime()) return false;
+      if (filter.to && time > filter.to.getTime()) return false;
+      if (filter.type && trx.type !== filter.type) return false;
+      if (filter.category && trx.category !== filter.category) return false;
+      if (q && !`${trx.note ?? ""} ${trx.category}`.toLowerCase().includes(q)) return false;
+      return true;
+    });
   }
 }
 

@@ -1,26 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/shared/ui/primitives/button";
 import { Card } from "@/shared/ui/primitives/card";
 import { Chip } from "@/shared/ui/primitives/chip";
 import { EmptyState } from "@/shared/ui/primitives/empty-state";
 import { Icon } from "@/shared/ui/primitives/icon";
 import { fieldVariants } from "@/shared/ui/primitives/field.variants";
-import { formatRowsSum, matchesFilter, TYPE_FILTERS, type DayGroupVM, type TypeFilter } from "../view-models/transaction-view-model";
+import { groupRows, hasActiveFilter, TYPE_FILTERS, type TransactionListFilters } from "../view-models/transaction-view-model";
 import { TransactionRow, TransactionRowList } from "./transaction-row";
+import { useSearchQuery, useTransactionList, type TransactionFirstPage } from "./use-transaction-list";
 
-/** Pencarian + filter jenis + daftar bergrup per hari (layar Transaksi mobile). */
-export function TransactionsMobile({ groups }: { groups: DayGroupVM[] }) {
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState<TypeFilter>("all");
-  const hasData = groups.length > 0;
-
-  const visible = groups
-    .map((group) => {
-      const rows = group.rows.filter((row) => matchesFilter(row, { query, type }));
-      return { ...group, rows, sum: rows.length === group.rows.length ? group.sum : formatRowsSum(rows) };
-    })
-    .filter((group) => group.rows.length > 0);
+/**
+ * Pencarian + filter jenis + daftar bergrup per hari (layar Transaksi mobile).
+ * Pencarian dan filter dikerjakan backend lewat URL, dan halaman berikutnya dimuat lewat "Muat lebih banyak".
+ */
+export function TransactionsMobile({ filters, firstPage }: { filters: TransactionListFilters; firstPage: TransactionFirstPage }) {
+  const list = useTransactionList(filters, firstPage);
+  const [query, setQuery] = useSearchQuery(filters.q, (q) => list.setFilters({ q }));
+  const groups = groupRows(list.rows);
+  const filtered = hasActiveFilter(filters);
 
   return (
     <>
@@ -28,15 +26,15 @@ export function TransactionsMobile({ groups }: { groups: DayGroupVM[] }) {
         <SearchBox id="tx-search" value={query} onChange={setQuery} placeholder="Cari transaksi atau kategori" />
         <div role="radiogroup" aria-label="Filter jenis" className="flex gap-2">
           {TYPE_FILTERS.map((filter) => (
-            <Chip key={filter.id} behavior="radio" selected={type === filter.id} onClick={() => setType(filter.id)}>
+            <Chip key={filter.id} behavior="radio" selected={filters.type === filter.id} onClick={() => list.setFilters({ type: filter.id })}>
               {filter.label}
             </Chip>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col gap-3.5 px-5 pt-1 pb-6">
-        {visible.map((group) => (
+      <div aria-busy={list.isFiltering} className="flex flex-col gap-3.5 px-5 pt-1 pb-6">
+        {groups.map((group) => (
           <section key={group.key} aria-label={group.label} className="flex flex-col gap-1.5">
             <div className="flex justify-between px-1 text-12 font-bold text-ink-600">
               <span>{group.label}</span>
@@ -53,15 +51,35 @@ export function TransactionsMobile({ groups }: { groups: DayGroupVM[] }) {
             </Card>
           </section>
         ))}
-        {visible.length === 0 && (
+        {groups.length === 0 && (
           <EmptyState
             withKoko={false}
-            title={hasData ? "Tidak ditemukan" : "Belum ada transaksi"}
-            body={hasData ? "Coba kata kunci atau filter lain." : "Ketuk tombol + untuk mencatat yang pertama."}
+            title={filtered ? "Tidak ditemukan" : "Belum ada transaksi"}
+            body={filtered ? "Coba kata kunci atau filter lain." : "Ketuk tombol + untuk mencatat yang pertama."}
           />
         )}
+        <LoadMore hasMore={list.hasMore} loading={list.isLoadingMore} error={list.error} onClick={list.loadMore} />
       </div>
     </>
+  );
+}
+
+/** Tombol "Muat lebih banyak" di bawah daftar mobile dan tabel desktop, plus pesan kalau gagal. */
+export function LoadMore({ hasMore, loading, error, onClick }: { hasMore: boolean; loading: boolean; error: string | null; onClick: () => void }) {
+  if (!hasMore && !error) return null;
+  return (
+    <div className="flex flex-col items-center gap-2">
+      {error && (
+        <p role="alert" className="m-0 text-14 font-semibold text-danger">
+          {error}
+        </p>
+      )}
+      {hasMore && (
+        <Button tone="paper" size={46} font="body-xs" elevation={1} loading={loading} onClick={onClick}>
+          {loading ? "Memuat..." : "Muat lebih banyak"}
+        </Button>
+      )}
+    </div>
   );
 }
 

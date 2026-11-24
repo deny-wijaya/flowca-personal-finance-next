@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { createSeedTransactions } from "../../infrastructure/in-memory-transaction-repository";
-import { groupByDay, toMonthNav, toSummaryStrip, toTransactionRow } from "./transaction-view-model";
+import {
+  groupRows,
+  parseTransactionFilters,
+  toMonthNav,
+  toSummaryStrip,
+  toTransactionFilter,
+  toTransactionRow,
+  transactionsHref,
+} from "./transaction-view-model";
 
 const NOW = new Date(2026, 10, 19, 22, 0);
 const ctx = { now: NOW, accountNames: new Map([["cash", "Tunai"], ["bank", "Rekening bank"]]) };
@@ -22,7 +30,7 @@ describe("transaction view model", () => {
   });
 
   it("mengelompokkan per hari dengan label relatif dan total bertanda", () => {
-    const groups = groupByDay(seed, ctx);
+    const groups = groupRows(seed.map((trx) => toTransactionRow(trx, ctx)));
     expect(groups.map((g) => [g.label, g.sum, g.rows.length])).toEqual([
       ["Hari ini · Kam, 19 Nov", "−Rp 47.000", 2],
       ["Kemarin · Rab, 18 Nov", "−Rp 168.000", 2],
@@ -34,7 +42,38 @@ describe("transaction view model", () => {
   });
 
   it("menghitung ringkasan masuk, keluar, dan selisih", () => {
-    expect(toSummaryStrip(seed)).toEqual({ totalIn: "Rp 7.700.000", totalOut: "Rp 647.500", net: "Rp 7.052.500" });
+    expect(toSummaryStrip({ totalIncome: 7_700_000, totalExpense: 647_500, netCashflow: 7_052_500 })).toEqual({
+      totalIn: "Rp 7.700.000",
+      totalOut: "Rp 647.500",
+      net: "Rp 7.052.500",
+    });
+  });
+
+  it("membaca filter dari URL dan membuang nilai yang tidak dikenal", () => {
+    expect(parseTransactionFilters({ month: "2026-10", q: "  gojek ", type: "out", category: "Transportasi" }, NOW)).toEqual({
+      month: "2026-10",
+      q: "gojek",
+      type: "out",
+      category: "Transportasi",
+    });
+    expect(parseTransactionFilters({ month: "bulan-lalu", type: "semua", category: "Bukan kategori" }, NOW)).toEqual({
+      month: "2026-11",
+      q: "",
+      type: "all",
+      category: "",
+    });
+  });
+
+  it("mengubah filter URL menjadi filter backend dan kembali menjadi URL", () => {
+    const filters = { month: "2026-11", q: "kopi", type: "out" as const, category: "" };
+    expect(toTransactionFilter(filters, NOW)).toEqual({
+      from: new Date(2026, 10, 1),
+      to: new Date(2026, 10, 30, 23, 59, 59, 999),
+      type: "expense",
+      category: undefined,
+      q: "kopi",
+    });
+    expect(transactionsHref(filters)).toBe("/transactions?month=2026-11&q=kopi&type=out");
   });
 
   it("tidak memberi link ke bulan di masa depan", () => {
