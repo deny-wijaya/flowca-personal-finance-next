@@ -7,6 +7,8 @@ export type TransactionFilter = {
   type?: TransactionType;
   /** Id kategori, misalnya "cat_expense_transportasi". */
   categoryId?: string;
+  /** Id akun. */
+  accountId?: string;
   /** Kata pencarian di catatan dan kategori, tanpa membedakan huruf besar dan kecil. */
   q?: string;
 };
@@ -38,10 +40,5 @@ export interface TransactionRepository {
   /** Satu halaman transaksi, urut dari `occurredAt` terbaru. */
   list(filter: TransactionFilter, page: PageRequest): Promise<Page<Transaction>>;
   summarize(range: DateRange): Promise<TransactionTotals>;
-  /**
-   * Selisih (pemasukan - pengeluaran) per id akun, sepanjang waktu.
-   * Backend belum menyimpan akun (Epic D), jadi implementasi HTTP mengembalikan Map kosong.
-   */
-  netByAccount(): Promise<ReadonlyMap<string, number>>;
   create(input: NewTransaction): Promise<Transaction>;
 }

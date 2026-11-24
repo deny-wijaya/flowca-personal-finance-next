@@ -2,12 +2,14 @@
 
 import { cva } from "class-variance-authority";
 import Link from "next/link";
-import { useState } from "react";
-import { Button, ButtonLink } from "@/shared/ui/primitives/button";
+import { useState, useTransition } from "react";
+import { Button } from "@/shared/ui/primitives/button";
 import { Koko } from "@/shared/ui/primitives/koko";
 import { MoneyInput } from "@/shared/ui/primitives/money-input";
+import { Notice } from "@/shared/ui/primitives/notice";
 import { PixelProgress } from "@/shared/ui/primitives/pixel-progress";
 import { TextField } from "@/shared/ui/primitives/text-field";
+import { completeOnboardingAction } from "../actions";
 
 const BUBBLES = [
   "Hai! Aku Koko, koin penjaga dompetmu. Kenalan dulu, yuk.",
@@ -52,8 +54,9 @@ function Dot({ on }: { on: boolean }) {
 }
 
 /**
- * Onboarding 4 langkah. TODO(onboarding): simpan nama tampilan, saldo awal, preferensi,
- * dan akun lewat use case saat endpoint profil/akun tersedia. Sekarang hanya alur UI.
+ * Onboarding 4 langkah. Langkah terakhir membuat akun yang dipilih lewat completeOnboardingAction,
+ * dengan "Total uang saat ini" sebagai saldo awal akun pertama.
+ * TODO(onboarding): nama tampilan dan preferensi belum disimpan, menunggu endpoint profil.
  */
 export function OnboardingFlow({ defaultName }: { defaultName: string }) {
   const [step, setStep] = useState(1);
@@ -61,6 +64,17 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
   const [balance, setBalance] = useState("");
   const [pref, setPref] = useState<(typeof PREFS)[number]["id"]>("daily");
   const [accounts, setAccounts] = useState<Record<string, boolean>>({ cash: true, bank: true });
+  const [saving, startSaving] = useTransition();
+  const [error, setError] = useState<string>();
+
+  function finish() {
+    const kinds = ACCOUNTS.filter((item) => accounts[item.id]).map((item) => item.id);
+    startSaving(async () => {
+      // Kalau berhasil, action langsung redirect ke /dashboard. Yang kembali ke sini hanya error.
+      const result = await completeOnboardingAction({ balance, kinds });
+      if (result.status === "error") setError(result.message);
+    });
+  }
 
   return (
     <>
@@ -122,7 +136,8 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
                 );
               })}
             </div>
-            <div className="text-12 text-ink-600">Pilih sebanyak yang kamu pakai. Nama & saldo per akun diatur di menu Akun.</div>
+            <div className="text-12 text-ink-600">Pilih sebanyak yang kamu pakai. Total uang tadi dicatat di akun pertama, dan akun lain bisa ditambah di menu Akun.</div>
+            {error && <Notice tone="error">{error}</Notice>}
           </>
         )}
 
@@ -137,9 +152,9 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
               Lanjut
             </Button>
           ) : (
-            <ButtonLink href="/dashboard" tone="coral" className="flex-1">
-              Ke dashboard
-            </ButtonLink>
+            <Button tone="coral" className="flex-1" loading={saving} onClick={finish}>
+              {saving ? "Menyimpan…" : "Ke dashboard"}
+            </Button>
           )}
         </div>
       </div>

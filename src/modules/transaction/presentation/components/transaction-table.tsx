@@ -27,30 +27,29 @@ type TransactionTableProps = {
   /** Jumlah semua transaksi di bulan ini (dari GET /summary), untuk footer tabel. */
   totalCount: number;
   categories: CategoryOptionVM[];
-  accounts: string[];
+  /** Akun dari GET /accounts, untuk filter Akun. */
+  accounts: { id: string; name: string }[];
   /** "November 2026" untuk footer tabel. */
   monthLabel: string;
 };
 
 /**
  * Tabel transaksi desktop: cari, filter jenis/kategori/akun, urut, dan pilih massal.
- * Pencarian, jenis, dan kategori dikerjakan backend lewat URL. Filter akun dan urutan kolom
- * hanya berlaku untuk baris yang sudah dimuat, karena backend belum menyimpan akun (Epic D).
+ * Pencarian, jenis, kategori, dan akun dikerjakan backend lewat URL. Urutan kolom (klik judul kolom)
+ * hanya berlaku untuk baris yang sudah dimuat.
  */
 export function TransactionTable({ filters, firstPage, totalCount, categories, accounts, monthLabel }: TransactionTableProps) {
   const list = useTransactionList(filters, firstPage);
   const rows = list.rows;
   const [query, setQuery] = useSearchQuery(filters.q, (q) => list.setFilters({ q }));
-  const [account, setAccount] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "date", dir: "desc" });
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
 
-  const shown = rows
-    .filter((row) => !account || row.account === account)
-    .sort((a, b) => {
-      const diff = sort.key === "date" ? a.sortTime - b.sortTime : a.sortAmount - b.sortAmount;
-      return sort.dir === "asc" ? diff : -diff;
-    });
+  // Salinan dulu: sort() mengubah array aslinya, sedangkan `rows` adalah state milik useTransactionList.
+  const shown = [...rows].sort((a, b) => {
+    const diff = sort.key === "date" ? a.sortTime - b.sortTime : a.sortAmount - b.sortAmount;
+    return sort.dir === "asc" ? diff : -diff;
+  });
 
   const allSelected = shown.length > 0 && shown.every((row) => selected.has(row.id));
   const selectedCount = rows.filter((row) => selected.has(row.id)).length;
@@ -101,7 +100,12 @@ export function TransactionTable({ filters, firstPage, totalCount, categories, a
           onChange={(category) => list.setFilters({ category })}
           options={categories.map((option) => ({ value: option.id, label: categoryOptionLabel(option) }))}
         />
-        <FilterSelect label="Akun" value={account} onChange={setAccount} options={accounts.map((name) => ({ value: name, label: name }))} />
+        <FilterSelect
+          label="Akun"
+          value={filters.account}
+          onChange={(account) => list.setFilters({ account })}
+          options={accounts.map((account) => ({ value: account.id, label: account.name }))}
+        />
       </div>
 
       {selectedCount > 0 && (
@@ -174,7 +178,7 @@ export function TransactionTable({ filters, firstPage, totalCount, categories, a
         </table>
         {shown.length === 0 && <div className="p-8 text-center text-15 text-ink-600">Tidak ada transaksi yang cocok dengan filter ini.</div>}
         <div className="border-t-3 border-ink px-4 py-3 text-13 text-ink-600">
-          {hasActiveFilter(filters) || account
+          {hasActiveFilter(filters)
             ? `Menampilkan ${shown.length} transaksi yang cocok · ${monthLabel}`
             : `Menampilkan ${shown.length} dari ${totalCount} transaksi · ${monthLabel}`}
         </div>

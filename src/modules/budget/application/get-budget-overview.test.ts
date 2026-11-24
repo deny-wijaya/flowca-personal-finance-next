@@ -24,12 +24,22 @@ describe("GetBudgetOverview", () => {
 
 describe("GetAccountBalances", () => {
   it("menghitung saldo = saldo awal + pemasukan − pengeluaran per akun", async () => {
-    const balances = await new GetAccountBalances(new InMemoryAccountRepository(), transactions()).execute();
+    const repo = transactions();
+    const balances = await new GetAccountBalances(new InMemoryAccountRepository(() => repo.netByAccount())).execute();
 
     expect(balances.total).toBe(9_552_500);
     expect(balances.accounts.map((account) => [account.name, account.balance])).toEqual([
       ["Tunai", 475_000],
       ["Rekening bank", 9_077_500],
     ]);
+  });
+});
+
+describe("GetAccountBalances dengan banyak halaman", () => {
+  it("mengikuti nextCursor sampai semua akun terambil", async () => {
+    const seed = Array.from({ length: 105 }, (_, i) => ({ id: `acc_${i}`, name: `Akun ${i}`, kind: "cash" as const, openingBalance: 1_000 }));
+    const balances = await new GetAccountBalances(new InMemoryAccountRepository(undefined, seed)).execute();
+    expect(balances.accounts).toHaveLength(105);
+    expect(balances.total).toBe(105_000);
   });
 });

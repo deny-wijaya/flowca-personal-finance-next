@@ -33,6 +33,6 @@ export async function loadTransactionsScreen(filters: TransactionListFilters, no
     firstPage: { rows: page.items.map((trx) => toTransactionRow(trx, ctx)), nextCursor: page.nextCursor },
     totalCount: summary.transactionCount,
     categories: toCategoryOptions(categories),
-    accounts: [...ctx.accountNames.values()],
+    accounts: [...ctx.accountNames].map(([id, name]) => ({ id, name })),
   };
 }

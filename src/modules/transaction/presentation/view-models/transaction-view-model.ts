@@ -188,6 +188,8 @@ export type TransactionListFilters = {
   type: TypeFilter;
   /** Id kategori (misalnya "cat_expense_makanan"), "" untuk semua kategori. */
   category: string;
+  /** Id akun, "" untuk semua akun. */
+  account: string;
 };
 
 type SearchParamValue = string | string[] | undefined;
@@ -198,18 +200,20 @@ export function parseTransactionFilters(params: Record<string, SearchParamValue>
   const first = (value: SearchParamValue) => (Array.isArray(value) ? value[0] : value) ?? "";
   const type = first(params.type);
   const category = first(params.category);
+  const account = first(params.account);
   return {
     month: toMonthParam(parseMonthParam(params.month, now)),
     q: first(params.q).trim().slice(0, MAX_QUERY_LENGTH),
     type: type === "in" || type === "out" ? type : "all",
     // Id kategori tidak dicek di sini: id yang tidak dikenal hanya menghasilkan daftar kosong dari backend.
     category: category.slice(0, MAX_QUERY_LENGTH),
+    account: account.slice(0, MAX_QUERY_LENGTH),
   };
 }
 
 /** true kalau ada filter selain bulan (untuk teks "Tidak ditemukan" dan footer tabel). */
 export function hasActiveFilter(filters: TransactionListFilters) {
-  return filters.q !== "" || filters.type !== "all" || filters.category !== "";
+  return filters.q !== "" || filters.type !== "all" || filters.category !== "" || filters.account !== "";
 }
 
 /** Filter URL menjadi filter domain untuk use case ListTransactions. */
@@ -218,6 +222,7 @@ export function toTransactionFilter(filters: TransactionListFilters, now: Date):
     ...monthRange(parseMonthParam(filters.month, now)),
     type: filters.type === "all" ? undefined : filters.type === "in" ? "income" : "expense",
     categoryId: filters.category || undefined,
+    accountId: filters.account || undefined,
     q: filters.q || undefined,
   };
 }
@@ -228,6 +233,7 @@ export function transactionsHref(filters: TransactionListFilters) {
   if (filters.q) params.set("q", filters.q);
   if (filters.type !== "all") params.set("type", filters.type);
   if (filters.category) params.set("category", filters.category);
+  if (filters.account) params.set("account", filters.account);
   return `/transactions?${params.toString()}`;
 }
 

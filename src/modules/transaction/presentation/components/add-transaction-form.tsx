@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { cn } from "@/shared/lib/cn";
 import { MINUS, parseThousands, formatThousands } from "@/shared/lib/format";
@@ -216,6 +217,15 @@ function AccountPicker({ legend, accounts, value, onChange, error }: { legend: s
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className={cn(fieldLabelClass, "mb-2 p-0")}>{legend}</legend>
+      {accounts.length === 0 && (
+        <Notice>
+          Kamu belum punya akun. Tambahkan dulu di menu{" "}
+          <Link href="/accounts" className="font-bold text-ink">
+            Akun
+          </Link>
+          , lalu catat transaksinya.
+        </Notice>
+      )}
       <div className="flex flex-wrap gap-2">
         {accounts.map((account) => (
           <Chip key={account.id} selected={value === account.id} onClick={() => onChange(account.id)} className="min-h-11 px-4">
