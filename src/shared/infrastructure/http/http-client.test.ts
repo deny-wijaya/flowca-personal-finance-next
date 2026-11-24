@@ -37,3 +37,20 @@ describe("HttpClient 401", () => {
     expect(onUnauthorized).not.toHaveBeenCalled();
   });
 });
+
+describe("HttpClient X-Forwarded-For", () => {
+  it("meneruskan IP browser dari getClientIp", async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ data: null }, 200));
+    vi.stubGlobal("fetch", fetchMock);
+    const http = new HttpClient({
+      baseUrl: "https://api.example.test/api/v1",
+      timeoutMs: 1_000,
+      getClientIp: async () => "203.0.113.10",
+    });
+
+    await http.request("/auth/login", { method: "POST", body: {}, schema: { safeParse: (data: unknown) => ({ success: true, data }) } as never });
+
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(new Headers(init.headers).get("X-Forwarded-For")).toBe("203.0.113.10");
+  });
+});

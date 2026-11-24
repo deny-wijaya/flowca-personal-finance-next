@@ -1,4 +1,5 @@
 import "server-only";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { GetAccountBalances } from "@/modules/account/application/get-account-balances";
 import { InMemoryAccountRepository } from "@/modules/account/infrastructure/in-memory-account-repository";
@@ -47,6 +48,8 @@ function getHttpClient() {
     getAccessToken: () => accessTokenCookie.read(),
     // Token ditolak backend: hapus cookie lewat Route Handler /auth/expired, lalu ke Login.
     onUnauthorized: () => redirect("/auth/expired"),
+    // IP browser dari request yang masuk ke Next (alamat pertama di X-Forwarded-For), diteruskan ke backend.
+    getClientIp: async () => (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
   });
 }
 

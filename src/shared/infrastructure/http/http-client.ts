@@ -12,6 +12,12 @@ export type HttpClientConfig = {
    * 401 INVALID_CREDENTIALS (password salah saat login) tidak memicu ini.
    */
   onUnauthorized?: () => never;
+  /**
+   * IP browser user, diteruskan ke backend di header X-Forwarded-For. Request ke API dikirim oleh
+   * server Next, jadi tanpa header ini backend hanya melihat IP server Next, dan rate limit login
+   * (5 gagal per menit per IP) akan mengunci semua user sekaligus.
+   */
+  getClientIp?: () => Promise<string | undefined>;
 };
 
 type QueryValue = string | number | boolean | undefined;
@@ -51,6 +57,9 @@ export class HttpClient {
 
     const token = await this.config.getAccessToken?.();
     if (token) headers.set("Authorization", `Bearer ${token}`);
+
+    const clientIp = await this.config.getClientIp?.();
+    if (clientIp) headers.set("X-Forwarded-For", clientIp);
 
     let response: Response;
     try {

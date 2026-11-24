@@ -166,3 +166,14 @@ describe("HttpAuthGateway.currentUser", () => {
     expect(init?.method).toBe("GET");
   });
 });
+
+describe("HttpAuthGateway rate limit login", () => {
+  it("429 TOO_MANY_REQUESTS menjadi ValidationError di field form dengan pesan dari backend", async () => {
+    const message = "Terlalu banyak percobaan masuk. Coba lagi dalam 1 menit.";
+    const { gateway } = setup(async () => jsonResponse({ error: { code: "TOO_MANY_REQUESTS", message } }, 429));
+
+    const error = await errorOf(gateway.signInWithPassword({ email: "rani@email.com", password: "salah1234", remember: true }));
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({ field: "form", message });
+  });
+});
