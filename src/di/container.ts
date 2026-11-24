@@ -2,6 +2,9 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { GetAccountBalances } from "@/modules/account/application/get-account-balances";
+import { CreateAccount } from "@/modules/account/application/create-account";
+import type { AccountRepository } from "@/modules/account/domain/account";
+import { HttpAccountRepository } from "@/modules/account/infrastructure/http-account-repository";
 import { InMemoryAccountRepository } from "@/modules/account/infrastructure/in-memory-account-repository";
 import { AuthUseCases } from "@/modules/auth/application/auth-use-cases";
 import type { AuthGateway } from "@/modules/auth/domain/auth-gateway";
@@ -44,6 +47,7 @@ import { createAccessTokenCookie } from "@/shared/infrastructure/session/access-
 const globalForMock = globalThis as unknown as {
   mockTransactionRepository?: InMemoryTransactionRepository;
   mockCategoryRepository?: InMemoryCategoryRepository;
+  mockAccountRepository?: InMemoryAccountRepository;
 };
 
 const accessTokenCookie = createAccessTokenCookie({ secure: env.NODE_ENV === "production" });
@@ -74,11 +78,17 @@ function getMockCategoryRepository(): InMemoryCategoryRepository {
   return globalForMock.mockCategoryRepository;
 }
 
+function getAccountRepository(): AccountRepository {
+  if (env.DATA_SOURCE === "api") return new HttpAccountRepository(getHttpClient());
+  // Mode mock: saldo dihitung dari transaksi di repository transaksi mock.
+  globalForMock.mockAccountRepository ??= new InMemoryAccountRepository(() => (getTransactionRepository() as InMemoryTransactionRepository).netByAccount());
+  return globalForMock.mockAccountRepository;
+}
+
 function getCategoryRepository(): CategoryRepository {
   return env.DATA_SOURCE === "api" ? new HttpCategoryRepository(getHttpClient()) : getMockCategoryRepository();
 }
 
-const accountRepository = new InMemoryAccountRepository();
 const budgetRepository = new InMemoryBudgetRepository();
 const mockAuthGateway = new MockAuthGateway();
 
@@ -98,7 +108,8 @@ export const container = {
   listCategories: () => new ListCategories(getCategoryRepository()),
   createCategory: () => new CreateCategory(getCategoryRepository()),
 
-  getAccountBalances: () => new GetAccountBalances(accountRepository, getTransactionRepository()),
+  getAccountBalances: () => new GetAccountBalances(getAccountRepository()),
+  createAccount: () => new CreateAccount(getAccountRepository()),
   getBudgetOverview: () => new GetBudgetOverview(budgetRepository, getTransactionRepository()),
 
   auth: () => new AuthUseCases(getAuthGateway()),

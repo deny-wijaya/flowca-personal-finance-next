@@ -18,7 +18,8 @@ export type TransactionsScreenVM = {
   totalCount: number;
   /** Kategori bawaan dan kustom dari GET /categories, untuk filter Kategori. */
   categories: CategoryOptionVM[];
-  accounts: string[];
+  /** Akun dari GET /accounts, untuk filter Akun. */
+  accounts: { id: string; name: string }[];
 };
 
 /** Layar Transaksi: daftar bergrup per hari (mobile) dan tabel + aksi massal (desktop). */

@@ -4,6 +4,10 @@ import type { TransactionType } from "@/modules/transaction/domain/transaction";
 export type QuickDraft = {
   name: string;
   category: string;
+  /**
+   * Dari parser berisi tebakan jenis akun ("cash" atau "bank"). Server Action Catat cepat menggantinya
+   * dengan id akun milik user sebelum draf ditampilkan dan disimpan.
+   */
   accountId: string;
   type: TransactionType;
   amount: number;

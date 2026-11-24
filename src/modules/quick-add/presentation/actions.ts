@@ -10,9 +10,26 @@ import { toDraftVM, type DraftVM } from "./view-models/draft-view-model";
 
 export type QuickReply = { kind: "draft"; drafts: QuickDraft[]; view: DraftVM; intro: string; note?: string } | { kind: "not-understood"; text: string };
 
-async function accountNames() {
+async function loadAccounts() {
   const { accounts } = await container.getAccountBalances().execute();
-  return new Map(accounts.map((account) => [account.id, account.name]));
+  return accounts;
+}
+
+const NO_ACCOUNT_REPLY: QuickReply = {
+  kind: "not-understood",
+  text: "Kamu belum punya akun untuk mencatat transaksi. Tambahkan dulu di menu Akun, ya.",
+};
+
+/**
+ * Parser hanya menebak JENIS akun dari kalimat ("pakai qris" berarti bank, selain itu tunai).
+ * Di sini tebakan itu diganti dengan akun milik user: akun pertama dengan jenis yang cocok,
+ * atau akun pertama kalau tidak ada yang cocok.
+ */
+function withUserAccounts(drafts: QuickDraft[], accounts: Awaited<ReturnType<typeof loadAccounts>>): QuickDraft[] {
+  return drafts.map((draft) => {
+    const match = accounts.find((account) => account.kind === draft.accountId) ?? accounts[0];
+    return { ...draft, accountId: match?.id ?? draft.accountId };
+  });
 }
 
 /** Kalimat bebas -> draf transaksi yang perlu dikonfirmasi. */
@@ -21,10 +38,13 @@ export async function parseQuickEntryAction(text: string): Promise<QuickReply> {
   if (drafts.length === 0) {
     return { kind: "not-understood", text: "Hmm, aku belum menangkap nominalnya. Berapa jumlahnya? Contoh: “bensin 30 ribu tunai”." };
   }
+  const accounts = await loadAccounts();
+  if (accounts.length === 0) return NO_ACCOUNT_REPLY;
+  const resolved = withUserAccounts(drafts, accounts);
   return {
     kind: "draft",
-    drafts,
-    view: toDraftVM(drafts, await accountNames()),
+    drafts: resolved,
+    view: toDraftVM(resolved, new Map(accounts.map((account) => [account.id, account.name]))),
     intro: drafts.length > 1 ? `Aku pisahkan jadi ${drafts.length} transaksi. Cek dulu, ya:` : "Ini yang aku tangkap. Sudah benar?",
   };
 }
@@ -32,10 +52,13 @@ export async function parseQuickEntryAction(text: string): Promise<QuickReply> {
 /** Foto nota -> satu draf pengeluaran (pembaca nota masih tiruan). */
 export async function readReceiptAction(): Promise<QuickReply> {
   const reading = await container.readReceipt().execute();
+  const accounts = await loadAccounts();
+  if (accounts.length === 0) return NO_ACCOUNT_REPLY;
+  const drafts = withUserAccounts([reading.draft], accounts);
   return {
     kind: "draft",
-    drafts: [reading.draft],
-    view: toDraftVM([reading.draft], await accountNames()),
+    drafts,
+    view: toDraftVM(drafts, new Map(accounts.map((account) => [account.id, account.name]))),
     intro: "Notanya terbaca. Totalnya aku catat sebagai satu pengeluaran:",
     note: reading.note,
   };

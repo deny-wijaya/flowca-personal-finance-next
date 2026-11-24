@@ -16,6 +16,7 @@ export class HttpTransactionRepository implements TransactionRepository {
         to: filter.to?.toISOString(),
         type: filter.type,
         category_id: filter.categoryId,
+        account_id: filter.accountId,
         q: filter.q,
         limit: page.limit,
         cursor: page.cursor,
@@ -32,11 +33,6 @@ export class HttpTransactionRepository implements TransactionRepository {
       schema: summaryDtoSchema,
     });
     return toTransactionTotals(dto);
-  }
-
-  async netByAccount(): Promise<ReadonlyMap<string, number>> {
-    // Backend belum menyimpan akun (Epic D), jadi saldo setiap akun sama dengan saldo awalnya.
-    return new Map();
   }
 
   async create(input: NewTransaction): Promise<Transaction> {

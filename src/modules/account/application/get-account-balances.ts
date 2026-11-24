@@ -1,24 +1,31 @@
-import type { TransactionRepository } from "@/modules/transaction/domain/transaction-repository";
 import type { Account, AccountRepository } from "../domain/account";
 
-export type AccountBalance = Account & { balance: number };
+export type AccountBalance = Account;
 
 export type AccountBalances = {
   accounts: AccountBalance[];
+  /** Jumlah saldo semua akun, untuk kartu Total saldo di Dashboard. */
   total: number;
 };
 
-/** Saldo tiap akun = saldo awal + pemasukan − pengeluaran yang tercatat di akun itu. */
+/** Batas per halaman saat mengambil akun. Biasanya semua akun muat di satu halaman. */
+const ACCOUNT_PAGE_LIMIT = 100;
+
+/**
+ * Semua akun milik user beserta saldo saat ini (dihitung backend dari saldo awal dan transaksi).
+ * Endpoint-nya memakai pagination, jadi halaman diikuti sampai `nextCursor` habis.
+ */
 export class GetAccountBalances {
-  constructor(
-    private readonly accounts: AccountRepository,
-    private readonly transactions: TransactionRepository,
-  ) {}
+  constructor(private readonly accounts: AccountRepository) {}
 
   async execute(): Promise<AccountBalances> {
-    const [accounts, delta] = await Promise.all([this.accounts.list(), this.transactions.netByAccount()]);
-
-    const withBalance = accounts.map((account) => ({ ...account, balance: account.openingBalance + (delta.get(account.id) ?? 0) }));
-    return { accounts: withBalance, total: withBalance.reduce((sum, account) => sum + account.balance, 0) };
+    const all: Account[] = [];
+    let cursor: string | undefined;
+    do {
+      const page = await this.accounts.list({ limit: ACCOUNT_PAGE_LIMIT, cursor });
+      all.push(...page.items);
+      cursor = page.nextCursor ?? undefined;
+    } while (cursor);
+    return { accounts: all, total: all.reduce((sum, account) => sum + account.balance, 0) };
   }
 }

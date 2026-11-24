@@ -57,6 +57,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
     };
   }
 
+  /** Selisih pemasukan − pengeluaran per id akun, untuk saldo di InMemoryAccountRepository (mode mock). */
   async netByAccount(): Promise<ReadonlyMap<string, number>> {
     const delta = new Map<string, number>();
     for (const trx of this.transactions) {
@@ -87,6 +88,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       if (filter.to && time > filter.to.getTime()) return false;
       if (filter.type && trx.type !== filter.type) return false;
       if (filter.categoryId && trx.categoryId !== filter.categoryId) return false;
+      if (filter.accountId && trx.accountId !== filter.accountId) return false;
       if (q && !`${trx.note ?? ""} ${trx.category}`.toLowerCase().includes(q)) return false;
       return true;
     });

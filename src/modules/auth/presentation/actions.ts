@@ -1,8 +1,12 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { container } from "@/di/container";
+import { ACCOUNT_KINDS, type AccountKind } from "@/modules/account/domain/account";
 import { ValidationError } from "@/shared/domain/errors";
+import { HttpError } from "@/shared/infrastructure/http/http-error";
+import { parseThousands } from "@/shared/lib/format";
 import type { GoogleSignInResult } from "../domain/auth-gateway";
 import { isStrongEnough } from "../domain/password-policy";
 import { firstName } from "../domain/user";
@@ -113,4 +117,43 @@ export async function resetPasswordAction(_prev: ResetState, formData: FormData)
 export async function signOutAction() {
   await container.auth().signOut();
   redirect("/login");
+}
+
+/** Nama akun yang dibuat untuk setiap pilihan di langkah "Uangmu ada di mana?" onboarding. */
+const ONBOARDING_ACCOUNT_NAMES: Record<AccountKind, string> = {
+  cash: "Tunai",
+  bank: "Rekening bank",
+  ewallet: "E-wallet",
+  credit: "Kartu kredit",
+};
+
+export type OnboardingState = { status: "idle" } | { status: "error"; message: string };
+
+/**
+ * Langkah terakhir onboarding (tombol "Ke dashboard"): membuat akun yang dipilih lewat POST /accounts.
+ * "Total uang saat ini" dari langkah 2 menjadi saldo awal akun pertama yang dipilih, dan akun lain mulai dari 0
+ * (API-CONTRACT.md bagian 4.8). Akun yang namanya sudah ada (misalnya onboarding diulang) dilewati.
+ */
+export async function completeOnboardingAction(input: { balance: string; kinds: string[] }): Promise<OnboardingState> {
+  const kinds = ACCOUNT_KINDS.filter((kind) => Array.isArray(input.kinds) && input.kinds.includes(kind));
+  if (kinds.length === 0) return { status: "error", message: "Pilih minimal satu akun, ya." };
+  const total = parseThousands(String(input.balance ?? ""));
+
+  try {
+    for (const [index, kind] of kinds.entries()) {
+      try {
+        await container.createAccount().execute({ name: ONBOARDING_ACCOUNT_NAMES[kind], kind, openingBalance: index === 0 ? total : 0 });
+      } catch (error) {
+        if (!(error instanceof ValidationError)) throw error;
+      }
+    }
+  } catch (error) {
+    if (error instanceof HttpError) {
+      console.error("[completeOnboardingAction]", error.status, error.code, error.message);
+      return { status: "error", message: "Akun belum tersimpan karena server bermasalah. Coba lagi, ya." };
+    }
+    throw error;
+  }
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
 }

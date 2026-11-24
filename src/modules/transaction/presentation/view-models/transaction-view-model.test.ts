@@ -55,25 +55,28 @@ describe("transaction view model", () => {
       q: "gojek",
       type: "out",
       category: "cat_expense_transportasi",
+      account: "",
     });
     expect(parseTransactionFilters({ month: "bulan-lalu", type: "semua" }, NOW)).toEqual({
       month: "2026-11",
       q: "",
       type: "all",
       category: "",
+      account: "",
     });
   });
 
   it("mengubah filter URL menjadi filter backend dan kembali menjadi URL", () => {
-    const filters = { month: "2026-11", q: "kopi", type: "out" as const, category: "" };
+    const filters = { month: "2026-11", q: "kopi", type: "out" as const, category: "", account: "acc_bca" };
     expect(toTransactionFilter(filters, NOW)).toEqual({
       from: new Date(2026, 10, 1),
       to: new Date(2026, 10, 30, 23, 59, 59, 999),
       type: "expense",
       categoryId: undefined,
+      accountId: "acc_bca",
       q: "kopi",
     });
-    expect(transactionsHref(filters)).toBe("/transactions?month=2026-11&q=kopi&type=out");
+    expect(transactionsHref(filters)).toBe("/transactions?month=2026-11&q=kopi&type=out&account=acc_bca");
   });
 
   it("tidak memberi link ke bulan di masa depan", () => {
