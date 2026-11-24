@@ -83,6 +83,7 @@ export class HttpAuthGateway implements AuthGateway {
  * Dipakai oleh register dan login.
  * - 400 VALIDATION_ERROR dan 409 EMAIL_ALREADY_REGISTERED: pesan per field dari `details.fieldErrors`.
  * - Backend mati atau timeout: pesan umum di field "form".
+ * - 429 TOO_MANY_REQUESTS (terlalu banyak login gagal): pesan dari backend di field "form".
  * Error lain (500, INVALID_RESPONSE) diteruskan apa adanya ke error boundary.
  */
 function toFormError(error: unknown): unknown {
@@ -90,6 +91,7 @@ function toFormError(error: unknown): unknown {
   if (error.isNetworkError) {
     return new ValidationError("Server sedang tidak bisa dihubungi. Coba lagi sebentar lagi.", "form");
   }
+  if (error.status === 429) return new ValidationError(error.message, "form");
   if (error.status === 400 || error.status === 409) {
     const [first] = toFieldMessages(error.details);
     return new ValidationError(first?.message ?? error.message, first?.field ?? "form");
