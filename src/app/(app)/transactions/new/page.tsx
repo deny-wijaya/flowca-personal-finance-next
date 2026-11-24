@@ -5,7 +5,7 @@ import { container } from "@/di/container";
 import { AddTransactionSheet } from "@/modules/transaction/presentation/components/add-transaction-sheet";
 import { TransactionsScreen } from "@/modules/transaction/presentation/screens/transactions-screen";
 import { toDateInputValue, toTimeInputValue } from "@/shared/lib/format";
-import { parseTransactionFilters } from "@/modules/transaction/presentation/view-models/transaction-view-model";
+import { parseTransactionFilters, toCategoryOptions } from "@/modules/transaction/presentation/view-models/transaction-view-model";
 import { ScreenSkeleton } from "../../_components/screen-skeleton";
 import { loadTransactionsScreen } from "../load";
 
@@ -23,7 +23,11 @@ export default function NewTransactionPage() {
 async function NewTransactionContent() {
   await connection();
   const now = new Date();
-  const [vm, balances] = await Promise.all([loadTransactionsScreen(parseTransactionFilters({}, now), now), container.getAccountBalances().execute()]);
+  const [vm, balances, categories] = await Promise.all([
+    loadTransactionsScreen(parseTransactionFilters({}, now), now),
+    container.getAccountBalances().execute(),
+    container.listCategories().execute(),
+  ]);
   return (
     <>
       <div aria-hidden="true" className="hidden lg:block">
@@ -31,6 +35,7 @@ async function NewTransactionContent() {
       </div>
       <AddTransactionSheet
         accounts={balances.accounts.map(({ id, name }) => ({ id, name }))}
+        categories={toCategoryOptions(categories)}
         defaultDate={toDateInputValue(now)}
         defaultTime={toTimeInputValue(now)}
         closeHref="/dashboard"

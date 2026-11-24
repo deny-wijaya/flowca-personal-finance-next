@@ -50,13 +50,13 @@ describe("transaction view model", () => {
   });
 
   it("membaca filter dari URL dan membuang nilai yang tidak dikenal", () => {
-    expect(parseTransactionFilters({ month: "2026-10", q: "  gojek ", type: "out", category: "Transportasi" }, NOW)).toEqual({
+    expect(parseTransactionFilters({ month: "2026-10", q: "  gojek ", type: "out", category: "cat_expense_transportasi" }, NOW)).toEqual({
       month: "2026-10",
       q: "gojek",
       type: "out",
-      category: "Transportasi",
+      category: "cat_expense_transportasi",
     });
-    expect(parseTransactionFilters({ month: "bulan-lalu", type: "semua", category: "Bukan kategori" }, NOW)).toEqual({
+    expect(parseTransactionFilters({ month: "bulan-lalu", type: "semua" }, NOW)).toEqual({
       month: "2026-11",
       q: "",
       type: "all",
@@ -70,7 +70,7 @@ describe("transaction view model", () => {
       from: new Date(2026, 10, 1),
       to: new Date(2026, 10, 30, 23, 59, 59, 999),
       type: "expense",
-      category: undefined,
+      categoryId: undefined,
       q: "kopi",
     });
     expect(transactionsHref(filters)).toBe("/transactions?month=2026-11&q=kopi&type=out");

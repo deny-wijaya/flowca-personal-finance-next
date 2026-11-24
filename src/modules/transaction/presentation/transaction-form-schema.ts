@@ -14,7 +14,7 @@ export const transactionFormSchema = z
       .string()
       .transform((value) => Number(value.replace(/\D/g, "")) || 0)
       .pipe(z.number().int().positive("Isi jumlahnya dulu, ya.")),
-    category: z.string().optional(),
+    categoryId: z.string().optional(),
     accountId: z.string().min(1, "Pilih akun"),
     toAccountId: z.string().optional(),
     date: z.iso.date("Tanggal tidak valid"),
@@ -22,7 +22,7 @@ export const transactionFormSchema = z
     note: z.string().max(200, "Catatan maksimal 200 karakter").optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.type !== "tf" && !value.category) ctx.addIssue({ code: "custom", path: ["category"], message: "Pilih satu kategori." });
+    if (value.type !== "tf" && !value.categoryId) ctx.addIssue({ code: "custom", path: ["categoryId"], message: "Pilih satu kategori." });
     if (value.type === "tf" && value.accountId === value.toAccountId)
       ctx.addIssue({ code: "custom", path: ["toAccountId"], message: "Akun asal dan tujuan tidak boleh sama." });
   });

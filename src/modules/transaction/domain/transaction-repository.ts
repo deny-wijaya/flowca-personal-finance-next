@@ -5,8 +5,8 @@ export type TransactionFilter = {
   from?: Date;
   to?: Date;
   type?: TransactionType;
-  /** Nama kategori persis, misalnya "Transportasi". */
-  category?: string;
+  /** Id kategori, misalnya "cat_expense_transportasi". */
+  categoryId?: string;
   /** Kata pencarian di catatan dan kategori, tanpa membedakan huruf besar dan kecil. */
   q?: string;
 };
@@ -24,7 +24,7 @@ export type TransactionTotals = {
   incomeCount: number;
   expenseCount: number;
   /** Pengeluaran per kategori, urut dari nominal terbesar. */
-  expenseByCategory: { category: string; amount: number }[];
+  expenseByCategory: { categoryId: string; category: string; amount: number }[];
 };
 
 /**

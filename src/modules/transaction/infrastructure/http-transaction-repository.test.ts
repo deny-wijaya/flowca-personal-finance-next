@@ -33,6 +33,7 @@ describe("HttpTransactionRepository", () => {
             id: "trx_1",
             type: "expense",
             amount: 64_000,
+            category_id: "cat_expense_transportasi",
             category: "Transportasi",
             note: null,
             occurred_at: "2026-11-06T02:00:00.000Z",
@@ -43,13 +44,13 @@ describe("HttpTransactionRepository", () => {
     );
 
     const result = await repo.list(
-      { from: new Date("2026-11-01T00:00:00.000Z"), type: "expense", q: "gojek", category: "Transportasi" },
+      { from: new Date("2026-11-01T00:00:00.000Z"), type: "expense", q: "gojek", categoryId: "cat_expense_transportasi" },
       { limit: 20, cursor: "abc" },
     );
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toBe(
-      "https://api.example.test/api/v1/transactions?from=2026-11-01T00%3A00%3A00.000Z&type=expense&category=Transportasi&q=gojek&limit=20&cursor=abc",
+      "https://api.example.test/api/v1/transactions?from=2026-11-01T00%3A00%3A00.000Z&type=expense&category_id=cat_expense_transportasi&q=gojek&limit=20&cursor=abc",
     );
     expect(new Headers(init?.headers).get("Authorization")).toBe("Bearer token-123");
     expect(result.nextCursor).toBe("eyJvIjoiMjAyNiJ9");
@@ -58,6 +59,7 @@ describe("HttpTransactionRepository", () => {
         id: "trx_1",
         type: "expense",
         amount: 64_000,
+        categoryId: "cat_expense_transportasi",
         category: "Transportasi",
         note: undefined,
         occurredAt: new Date("2026-11-06T02:00:00.000Z"),
@@ -73,6 +75,7 @@ describe("HttpTransactionRepository", () => {
             id: "trx_2",
             type: "income",
             amount: 2_000_000,
+            category_id: "cat_income_freelance",
             category: "Freelance",
             note: "Landing page klien",
             occurred_at: "2026-11-08T00:00:00.000Z",
@@ -85,7 +88,7 @@ describe("HttpTransactionRepository", () => {
     await repo.create({
       type: "income",
       amount: 2_000_000,
-      category: "Freelance",
+      categoryId: "cat_income_freelance",
       note: "Landing page klien",
       accountId: "bank",
       occurredAt: new Date("2026-11-08T00:00:00.000Z"),
@@ -96,7 +99,7 @@ describe("HttpTransactionRepository", () => {
     expect(JSON.parse(String(init?.body))).toEqual({
       type: "income",
       amount: 2_000_000,
-      category: "Freelance",
+      category_id: "cat_income_freelance",
       note: "Landing page klien",
       account_id: "bank",
       occurred_at: "2026-11-08T00:00:00.000Z",
@@ -138,7 +141,7 @@ describe("HttpTransactionRepository", () => {
           transaction_count: 2,
           income_count: 1,
           expense_count: 1,
-          expense_by_category: [{ category: "Transportasi", amount: 64_000 }],
+          expense_by_category: [{ category_id: "cat_expense_transportasi", category: "Transportasi", amount: 64_000 }],
         },
       }),
     );
@@ -155,7 +158,7 @@ describe("HttpTransactionRepository", () => {
       transactionCount: 2,
       incomeCount: 1,
       expenseCount: 1,
-      expenseByCategory: [{ category: "Transportasi", amount: 64_000 }],
+      expenseByCategory: [{ categoryId: "cat_expense_transportasi", category: "Transportasi", amount: 64_000 }],
     });
   });
 

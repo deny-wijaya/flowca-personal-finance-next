@@ -6,7 +6,7 @@ import { Amount } from "../components/amount";
 import { TransactionTable } from "../components/transaction-table";
 import { TransactionsMobile } from "../components/transactions-mobile";
 import type { TransactionFirstPage } from "../components/use-transaction-list";
-import type { MonthNavVM, SummaryStripVM, TransactionListFilters } from "../view-models/transaction-view-model";
+import type { CategoryOptionVM, MonthNavVM, SummaryStripVM, TransactionListFilters } from "../view-models/transaction-view-model";
 
 export type TransactionsScreenVM = {
   monthNav: MonthNavVM;
@@ -16,7 +16,8 @@ export type TransactionsScreenVM = {
   firstPage: TransactionFirstPage;
   /** Jumlah semua transaksi bulan ini, dari GET /summary. */
   totalCount: number;
-  categories: string[];
+  /** Kategori bawaan dan kustom dari GET /categories, untuk filter Kategori. */
+  categories: CategoryOptionVM[];
   accounts: string[];
 };
 

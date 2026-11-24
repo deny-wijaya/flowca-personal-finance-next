@@ -2,10 +2,10 @@ import "server-only";
 import { container } from "@/di/container";
 import type { TransactionsScreenVM } from "@/modules/transaction/presentation/screens/transactions-screen";
 import {
-  ALL_CATEGORIES,
   toMonthNav,
   toSummaryStrip,
   toTransactionFilter,
+  toCategoryOptions,
   toTransactionRow,
   type TransactionListFilters,
 } from "@/modules/transaction/presentation/view-models/transaction-view-model";
@@ -20,9 +20,10 @@ import { loadTransactionContext } from "../_components/load-context";
  */
 export async function loadTransactionsScreen(filters: TransactionListFilters, now: Date): Promise<TransactionsScreenVM> {
   const month = parseMonthParam(filters.month, now);
-  const [page, summary, ctx] = await Promise.all([
+  const [page, summary, categories, ctx] = await Promise.all([
     container.listTransactions().execute(toTransactionFilter(filters, now), { limit: DEFAULT_PAGE_LIMIT }),
     container.getMonthlySummary().execute(month),
+    container.listCategories().execute(),
     loadTransactionContext(now),
   ]);
   return {
@@ -31,7 +32,7 @@ export async function loadTransactionsScreen(filters: TransactionListFilters, no
     filters,
     firstPage: { rows: page.items.map((trx) => toTransactionRow(trx, ctx)), nextCursor: page.nextCursor },
     totalCount: summary.transactionCount,
-    categories: [...ALL_CATEGORIES],
+    categories: toCategoryOptions(categories),
     accounts: [...ctx.accountNames.values()],
   };
 }
