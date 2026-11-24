@@ -17,3 +17,13 @@ Baca `docs/ARCHITECTURE.md` sebelum menambah file, folder, atau modul baru. Atur
 ## Sebelum selesai
 
 Jalankan `npm run verify` (typecheck, lint, test, build) dan pastikan semuanya lolos.
+
+## Cek UI langsung di browser
+
+Setiap perubahan yang menyentuh UI (screen, komponen, layout, style, atau apa pun yang dilihat dan diklik user) wajib dibuka di browser sebelum dilaporkan selesai. `npm run verify` dan curl tidak cukup, karena keduanya tidak menjalankan klik, dropdown, atau redirect di sisi browser.
+
+- Pakai browser yang tersedia di sesi (built-in browser atau Claude in Chrome), dan muat skill browser-nya dulu sebelum langkah pertama.
+- Buka halaman yang berubah di dua lebar layar: desktop (minimal 1024px) dan HP (sekitar 390px).
+- Jalankan alur yang berubah sampai selesai, misalnya buka menu, isi form, klik tombol, dan pastikan redirect-nya benar.
+- Bandingkan tampilannya dengan file desain yang sesuai di `design/*.dc.html`.
+- Laporkan apa yang terlihat, termasuk masalah yang ditemukan. Kalau browser tidak tersedia, tulis dengan jelas bahwa UI belum dicek di browser.

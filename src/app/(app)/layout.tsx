@@ -1,7 +1,7 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { container } from "@/di/container";
-import { ProfileCard } from "@/modules/auth/presentation/components/profile-card";
+import { ProfileMenu } from "@/modules/auth/presentation/components/profile-menu";
 import { toUserVM } from "@/modules/auth/presentation/view-models/user-view-model";
 import { QuickAddPanel } from "@/modules/quick-add/presentation/components/quick-add-panel";
 import { quickAddGreeting } from "@/modules/quick-add/presentation/greetings";
@@ -33,7 +33,9 @@ async function currentUser() {
 }
 
 async function SidebarProfile() {
-  return <ProfileCard user={await currentUser()} />;
+  // Kartu profil di bawah Sidebar desktop. Mengklik kartu membuka menu yang sama dengan avatar di HP,
+  // termasuk tombol Keluar.
+  return <ProfileMenu user={await currentUser()} variant="card" />;
 }
 
 async function QuickAddSidePanel() {
