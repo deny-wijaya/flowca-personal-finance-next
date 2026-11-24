@@ -19,6 +19,9 @@ export default function BudgetPage({ searchParams }: PageProps<"/budget">) {
 
 async function BudgetContent({ searchParams }: Pick<PageProps<"/budget">, "searchParams">) {
   await connection();
-  const overview = await container.getBudgetOverview().execute(parseMonthParam((await searchParams).month));
-  return <BudgetScreen vm={toBudgetScreen(overview)} />;
+  const [overview, categories] = await Promise.all([
+    container.getBudgetOverview().execute(parseMonthParam((await searchParams).month)),
+    container.listCategories().execute("expense"),
+  ]);
+  return <BudgetScreen vm={toBudgetScreen(overview, categories)} />;
 }

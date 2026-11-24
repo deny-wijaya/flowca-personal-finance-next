@@ -23,10 +23,10 @@ describe("toBudgetScreen", () => {
       totalSpent: 647_500,
       remaining: 2_332_500,
       items: [
-        { category: "Makanan", spent: 47_000, limit: 1_500_000, ratio: 47_000 / 1_500_000 },
-        { category: "Tagihan", spent: 150_000, limit: 180_000, ratio: 150_000 / 180_000 },
-        { category: "Belanja", spent: 432_500, limit: 400_000, ratio: 432_500 / 400_000 },
-        { category: "Hiburan", spent: 0, limit: 300_000, ratio: 0 },
+        { categoryId: "cat_expense_makanan", category: "Makanan", spent: 47_000, limit: 1_500_000, ratio: 47_000 / 1_500_000 },
+        { categoryId: "cat_expense_tagihan", category: "Tagihan", spent: 150_000, limit: 180_000, ratio: 150_000 / 180_000 },
+        { categoryId: "cat_expense_belanja", category: "Belanja", spent: 432_500, limit: 400_000, ratio: 432_500 / 400_000 },
+        { categoryId: "cat_expense_hiburan", category: "Hiburan", spent: 0, limit: 300_000, ratio: 0 },
       ],
     });
 

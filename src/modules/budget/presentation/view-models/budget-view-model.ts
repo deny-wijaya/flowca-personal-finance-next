@@ -22,7 +22,10 @@ export function filledSegments(usage: Pick<BudgetUsage, "ratio" | "spent">, segm
 }
 
 export type BudgetRowVM = {
+  categoryId: string;
   category: string;
+  /** Nominal batas tanpa format, "1.500.000", untuk mengisi kotak ubah anggaran. */
+  limitInput: string;
   initial: string;
   tone: CategoryTileTone;
   status: BudgetStatus;
@@ -41,7 +44,9 @@ export function toBudgetRow(usage: BudgetUsage): BudgetRowVM {
   const status = budgetTone(usage.ratio);
   const over = status === "over";
   return {
+    categoryId: usage.categoryId,
     category: usage.category,
+    limitInput: formatThousands(usage.limit),
     initial: categoryInitial(usage.category),
     tone: categoryTone(usage.category),
     status,
@@ -68,9 +73,13 @@ export type BudgetScreenVM = {
   perDay: string;
   categoryCount: number;
   rows: BudgetRowVM[];
+  /** Kategori pengeluaran yang belum punya anggaran, untuk pilihan di "Tambah anggaran kategori". */
+  availableCategories: { id: string; name: string }[];
 };
 
-export function toBudgetScreen(overview: BudgetOverview): BudgetScreenVM {
+/** `categories`: semua kategori pengeluaran user (bawaan dan kustom) dari GET /categories. */
+export function toBudgetScreen(overview: BudgetOverview, categories: { id: string; name: string }[] = []): BudgetScreenVM {
+  const budgeted = new Set(overview.items.map((item) => item.categoryId));
   const usedPercent = overview.totalLimit > 0 ? Math.min(100, Math.round((overview.totalSpent / overview.totalLimit) * 100)) : 0;
   const perDayRaw = overview.daysLeft > 0 ? Math.max(0, overview.remaining) / overview.daysLeft : 0;
   return {
@@ -83,5 +92,6 @@ export function toBudgetScreen(overview: BudgetOverview): BudgetScreenVM {
     perDay: `Rp ${formatThousands(Math.floor(perDayRaw / 1000) * 1000)}`,
     categoryCount: overview.items.length,
     rows: overview.items.map(toBudgetRow),
+    availableCategories: categories.filter((category) => !budgeted.has(category.id)).map(({ id, name }) => ({ id, name })),
   };
 }
