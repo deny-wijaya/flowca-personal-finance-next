@@ -111,11 +111,15 @@ function DesktopDashboard({ vm }: { vm: DashboardVM }) {
         </Card>
         <Card as="section" aria-labelledby="dh-budget" elevation={3} className="overflow-hidden">
           <PanelHeader id="dh-budget" title="Anggaran" href="/budget" action="Atur" />
-          <ul className="m-0 flex list-none flex-col gap-3.5 px-4 pt-2 pb-3.5">
-            {vm.budget.rows.map((row) => (
-              <BudgetLine key={row.category} row={row} />
-            ))}
-          </ul>
+          {vm.budget.empty ? (
+            <p className="m-0 p-6 text-center text-14 text-ink-600">Belum ada anggaran. Atur batas belanja per kategori di menu Anggaran.</p>
+          ) : (
+            <ul className="m-0 flex list-none flex-col gap-3.5 px-4 pt-2 pb-3.5">
+              {vm.budget.rows.map((row) => (
+                <BudgetLine key={row.categoryId} row={row} />
+              ))}
+            </ul>
+          )}
         </Card>
       </div>
     </div>

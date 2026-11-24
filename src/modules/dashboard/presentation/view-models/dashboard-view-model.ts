@@ -24,7 +24,8 @@ export type DashboardVM = {
   balance: { total: string; caption: string };
   income: { label: string; value: string; caption: string };
   expense: { label: string; value: string; caption: string };
-  budget: { remaining: string; caption: string; rows: BudgetRowVM[] };
+  /** `empty`: user belum mengatur anggaran apa pun, jadi kartu menampilkan ajakan ke menu Anggaran. */
+  budget: { remaining: string; caption: string; rows: BudgetRowVM[]; empty: boolean };
   recentMobile: RecentRow[];
   recentDesktop: RecentRow[];
 };
@@ -61,12 +62,19 @@ export function toDashboardVM({ user, now, month, monthNav, balances, summary, r
     },
     income: { label: `Masuk · ${monthShort}`, value: formatRupiah(summary.totalIncome), caption: `${summary.incomeCount} transaksi` },
     expense: { label: `Keluar · ${monthShort}`, value: formatRupiah(summary.totalExpense), caption: `${summary.expenseCount} transaksi` },
-    budget: {
-      remaining: `${budget.remaining < 0 ? "−" : ""}${formatRupiah(budget.remaining)}`,
-      caption: `dari ${formatRupiah(budget.totalLimit)}`,
-      rows: budget.items.map(toBudgetRow),
-    },
+    budget: toDashboardBudget(budget),
     recentMobile: rows.slice(0, 3).map((row) => ({ ...row, meta: rowMetaWithRelativeTime(row) })),
     recentDesktop: rows.slice(0, DASHBOARD_RECENT_LIMIT).map((row) => ({ ...row, meta: rowMetaWithDay(row) })),
+  };
+}
+
+/** Kartu Sisa anggaran dan panel Anggaran. Tanpa anggaran, kartu mengajak user ke menu Anggaran. */
+function toDashboardBudget(budget: BudgetOverview): DashboardVM["budget"] {
+  if (budget.items.length === 0) return { remaining: "Belum diatur", caption: "Atur di menu Anggaran", rows: [], empty: true };
+  return {
+    remaining: `${budget.remaining < 0 ? "−" : ""}${formatRupiah(budget.remaining)}`,
+    caption: `dari ${formatRupiah(budget.totalLimit)}`,
+    rows: budget.items.map(toBudgetRow),
+    empty: false,
   };
 }

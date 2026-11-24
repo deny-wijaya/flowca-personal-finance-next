@@ -16,6 +16,17 @@ describe("GetBudgetOverview", () => {
     expect(overview.items.find((item) => item.category === "Belanja")).toMatchObject({ spent: 432_500, limit: 400_000 });
   });
 
+  it("tanpa anggaran: tidak ada item dan total 0", async () => {
+    const overview = await new GetBudgetOverview(new InMemoryBudgetRepository([]), transactions(), () => NOW).execute({ year: 2026, month: 11 });
+    expect(overview).toMatchObject({ items: [], totalLimit: 0, totalSpent: 0, remaining: 0 });
+  });
+
+  it("menggabungkan batas dan pengeluaran lewat categoryId, termasuk kategori kustom", async () => {
+    const budgets = new InMemoryBudgetRepository([{ categoryId: "cat_kos", category: "Kos", limit: 1_500_000 }]);
+    const overview = await new GetBudgetOverview(budgets, transactions(), () => NOW).execute({ year: 2026, month: 11 });
+    expect(overview.items).toEqual([{ categoryId: "cat_kos", category: "Kos", limit: 1_500_000, spent: 0, ratio: 0 }]);
+  });
+
   it("menganggap bulan lampau tidak punya sisa hari", async () => {
     const overview = await new GetBudgetOverview(new InMemoryBudgetRepository(), transactions(), () => NOW).execute({ year: 2026, month: 10 });
     expect(overview).toMatchObject({ totalSpent: 0, daysLeft: 0 });

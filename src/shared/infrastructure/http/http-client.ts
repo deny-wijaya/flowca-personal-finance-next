@@ -74,6 +74,15 @@ export class HttpClient {
     return { items: envelope.data, nextCursor: envelope.page.next_cursor };
   }
 
+  /**
+   * Request yang sukses dibalas 204 tanpa body, misalnya DELETE (API-CONTRACT.md bagian 3).
+   * `request` tidak bisa dipakai di sini karena ia mewajibkan body `{ data }`.
+   */
+  async requestNoContent(path: string, options: Omit<RequestOptions<z.ZodType>, "schema">): Promise<void> {
+    // Body 204 dibaca sebagai null oleh `send`, jadi yang divalidasi adalah null.
+    await this.send(path, options, z.null());
+  }
+
   /** Mengirim request dan mengembalikan seluruh body response setelah divalidasi dengan `envelopeSchema`. */
   private async send(path: string, { method = "GET", query, body }: Omit<RequestOptions<z.ZodType>, "schema">, envelopeSchema: z.ZodType): Promise<unknown> {
     const url = this.buildUrl(path, query);

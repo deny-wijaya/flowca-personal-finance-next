@@ -11,6 +11,9 @@ import type { AuthGateway } from "@/modules/auth/domain/auth-gateway";
 import { HttpAuthGateway } from "@/modules/auth/infrastructure/http-auth-gateway";
 import { MockAuthGateway } from "@/modules/auth/infrastructure/mock-auth-gateway";
 import { GetBudgetOverview } from "@/modules/budget/application/get-budget-overview";
+import { DeleteBudget, SetBudget } from "@/modules/budget/application/set-budget";
+import type { BudgetRepository } from "@/modules/budget/domain/budget";
+import { HttpBudgetRepository } from "@/modules/budget/infrastructure/http-budget-repository";
 import { InMemoryBudgetRepository } from "@/modules/budget/infrastructure/in-memory-budget-repository";
 import { ParseQuickEntry, ReadReceipt, SaveQuickDrafts } from "@/modules/quick-add/application/quick-add-use-cases";
 import { MockReceiptReader, RuleBasedQuickEntryParser } from "@/modules/quick-add/infrastructure/rule-based-quick-entry-parser";
@@ -48,6 +51,7 @@ const globalForMock = globalThis as unknown as {
   mockTransactionRepository?: InMemoryTransactionRepository;
   mockCategoryRepository?: InMemoryCategoryRepository;
   mockAccountRepository?: InMemoryAccountRepository;
+  mockBudgetRepository?: InMemoryBudgetRepository;
 };
 
 const accessTokenCookie = createAccessTokenCookie({ secure: env.NODE_ENV === "production" });
@@ -89,7 +93,11 @@ function getCategoryRepository(): CategoryRepository {
   return env.DATA_SOURCE === "api" ? new HttpCategoryRepository(getHttpClient()) : getMockCategoryRepository();
 }
 
-const budgetRepository = new InMemoryBudgetRepository();
+function getBudgetRepository(): BudgetRepository {
+  if (env.DATA_SOURCE === "api") return new HttpBudgetRepository(getHttpClient());
+  globalForMock.mockBudgetRepository ??= new InMemoryBudgetRepository();
+  return globalForMock.mockBudgetRepository;
+}
 const mockAuthGateway = new MockAuthGateway();
 
 function getAuthGateway(): AuthGateway {
@@ -110,7 +118,9 @@ export const container = {
 
   getAccountBalances: () => new GetAccountBalances(getAccountRepository()),
   createAccount: () => new CreateAccount(getAccountRepository()),
-  getBudgetOverview: () => new GetBudgetOverview(budgetRepository, getTransactionRepository()),
+  getBudgetOverview: () => new GetBudgetOverview(getBudgetRepository(), getTransactionRepository()),
+  setBudget: () => new SetBudget(getBudgetRepository()),
+  deleteBudget: () => new DeleteBudget(getBudgetRepository()),
 
   auth: () => new AuthUseCases(getAuthGateway()),
 
