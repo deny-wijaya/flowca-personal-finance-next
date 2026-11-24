@@ -130,14 +130,26 @@ const ONBOARDING_ACCOUNT_NAMES: Record<AccountKind, string> = {
 export type OnboardingState = { status: "idle" } | { status: "error"; message: string };
 
 /**
- * Langkah terakhir onboarding (tombol "Ke dashboard"): membuat akun yang dipilih lewat POST /accounts.
+ * Langkah terakhir onboarding (tombol "Ke dashboard"): menyimpan nama tampilan lewat PATCH /auth/me,
+ * lalu membuat akun yang dipilih lewat POST /accounts.
  * "Total uang saat ini" dari langkah 2 menjadi saldo awal akun pertama yang dipilih, dan akun lain mulai dari 0
  * (API-CONTRACT.md bagian 4.8). Akun yang namanya sudah ada (misalnya onboarding diulang) dilewati.
  */
-export async function completeOnboardingAction(input: { balance: string; kinds: string[] }): Promise<OnboardingState> {
+export async function completeOnboardingAction(input: { name: string; balance: string; kinds: string[] }): Promise<OnboardingState> {
   const kinds = ACCOUNT_KINDS.filter((kind) => Array.isArray(input.kinds) && input.kinds.includes(kind));
   if (kinds.length === 0) return { status: "error", message: "Pilih minimal satu akun, ya." };
   const total = parseThousands(String(input.balance ?? ""));
+
+  try {
+    await container.auth().updateName(String(input.name ?? ""));
+  } catch (error) {
+    if (error instanceof ValidationError) return { status: "error", message: error.message };
+    if (error instanceof HttpError) {
+      console.error("[completeOnboardingAction]", error.status, error.code, error.message);
+      return { status: "error", message: "Nama belum tersimpan karena server bermasalah. Coba lagi, ya." };
+    }
+    throw error;
+  }
 
   try {
     for (const [index, kind] of kinds.entries()) {

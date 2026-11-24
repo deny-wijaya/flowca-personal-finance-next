@@ -11,17 +11,12 @@ import { PixelProgress } from "@/shared/ui/primitives/pixel-progress";
 import { TextField } from "@/shared/ui/primitives/text-field";
 import { completeOnboardingAction } from "../actions";
 
+const STEP_COUNT = 3;
+
 const BUBBLES = [
   "Hai! Aku Koko, koin penjaga dompetmu. Kenalan dulu, yuk.",
   "Mulai dari angka yang ada sekarang. Nggak perlu sempurna.",
-  "Pilih ritme yang paling nyaman. Bisa diubah di Pengaturan.",
   "Terakhir! Akun mana saja yang mau kamu pantau?",
-] as const;
-
-const PREFS = [
-  { id: "daily", title: "Catat tiap transaksi", desc: "Paling detail, cocok buat yang rajin." },
-  { id: "weekly", title: "Ringkasan mingguan", desc: "Isi sekali seminggu, santai." },
-  { id: "budget", title: "Fokus anggaran", desc: "Pantau batas belanja per kategori." },
 ] as const;
 
 const ACCOUNTS = [
@@ -34,13 +29,11 @@ const ACCOUNTS = [
 const optionCard = cva("fc-press flex border-3 border-ink font-body text-left text-ink shadow-hard-2", {
   variants: {
     kind: {
-      pref: "min-h-18 items-center gap-3 rounded-xl px-3.5 py-3",
       account: "min-h-22 flex-col items-start justify-between gap-2 rounded-xl p-3",
     },
     on: { true: "", false: "bg-paper" },
   },
   compoundVariants: [
-    { kind: "pref", on: true, className: "bg-orange-100" },
     { kind: "account", on: true, className: "bg-cyan-100" },
   ],
 });
@@ -54,15 +47,14 @@ function Dot({ on }: { on: boolean }) {
 }
 
 /**
- * Onboarding 4 langkah. Langkah terakhir membuat akun yang dipilih lewat completeOnboardingAction,
- * dengan "Total uang saat ini" sebagai saldo awal akun pertama.
- * TODO(onboarding): nama tampilan dan preferensi belum disimpan, menunggu endpoint profil.
+ * Onboarding 3 langkah: nama tampilan, total uang, dan akun. Tombol "Ke dashboard" menyimpan semuanya
+ * lewat completeOnboardingAction: nama lewat PATCH /auth/me, lalu akun yang dipilih, dengan
+ * "Total uang saat ini" sebagai saldo awal akun pertama.
  */
 export function OnboardingFlow({ defaultName }: { defaultName: string }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState(defaultName);
   const [balance, setBalance] = useState("");
-  const [pref, setPref] = useState<(typeof PREFS)[number]["id"]>("daily");
   const [accounts, setAccounts] = useState<Record<string, boolean>>({ cash: true, bank: true });
   const [saving, startSaving] = useTransition();
   const [error, setError] = useState<string>();
@@ -71,7 +63,7 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
     const kinds = ACCOUNTS.filter((item) => accounts[item.id]).map((item) => item.id);
     startSaving(async () => {
       // Kalau berhasil, action langsung redirect ke /dashboard. Yang kembali ke sini hanya error.
-      const result = await completeOnboardingAction({ balance, kinds });
+      const result = await completeOnboardingAction({ name, balance, kinds });
       if (result.status === "error") setError(result.message);
     });
   }
@@ -79,13 +71,13 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
   return (
     <>
       <div className="flex items-center justify-between gap-3 px-5 pt-4">
-        <div className="text-13 font-bold">Langkah {step} dari 4</div>
+        <div className="text-13 font-bold">Langkah {step} dari {STEP_COUNT}</div>
         <Link href="/dashboard" className="px-1 py-3 text-15 font-bold">
           Lewati
         </Link>
       </div>
       <div className="px-5 pt-1">
-        <PixelProgress size="md" segments={4} filled={step} tone={["over", "warn", "pink", "safe"]} label="Progres onboarding" valueMin={1} valueMax={4} valueNow={step} />
+        <PixelProgress size="md" segments={STEP_COUNT} filled={step} tone={["over", "warn", "safe"]} label="Progres onboarding" valueMin={1} valueMax={STEP_COUNT} valueNow={step} />
       </div>
 
       <div className="flex flex-1 flex-col gap-4.5 px-5 pt-5.5 pb-5">
@@ -97,7 +89,7 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
         {step === 1 && (
           <>
             <h1 className="m-0 font-display text-26 font-bold">Mau dipanggil apa?</h1>
-            <TextField id="ob-name" label="Nama tampilan" autoComplete="nickname" placeholder="Misal: Rani" size={52} value={name} onChange={(event) => setName(event.target.value)} hint="Diambil dari akun Google-mu, boleh diganti." />
+            <TextField id="ob-name" label="Nama tampilan" autoComplete="nickname" placeholder="Misal: Rani" size={52} value={name} onChange={(event) => setName(event.target.value)} hint="Nama ini yang muncul di sapaan Dashboard. Boleh diganti." />
           </>
         )}
         {step === 2 && (
@@ -107,22 +99,6 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
           </>
         )}
         {step === 3 && (
-          <>
-            <h1 className="m-0 font-display text-26 font-bold">Gaya mencatatmu?</h1>
-            <div role="radiogroup" aria-label="Preferensi pencatatan" className="flex flex-col gap-2.5">
-              {PREFS.map((item) => (
-                <button key={item.id} type="button" role="radio" aria-checked={pref === item.id} onClick={() => setPref(item.id)} className={optionCard({ kind: "pref", on: pref === item.id })}>
-                  <Dot on={pref === item.id} />
-                  <span className="flex flex-col gap-0.5">
-                    <span className="text-16 font-bold">{item.title}</span>
-                    <span className="text-13 text-ink-600">{item.desc}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        {step === 4 && (
           <>
             <h1 className="m-0 font-display text-26 font-bold">Uangmu ada di mana?</h1>
             <div className="grid grid-cols-2 gap-2.5">
@@ -147,8 +123,9 @@ export function OnboardingFlow({ defaultName }: { defaultName: string }) {
               Kembali
             </Button>
           )}
-          {step < 4 ? (
-            <Button tone="cyan" className="flex-1" onClick={() => setStep((value) => value + 1)}>
+          {step < STEP_COUNT ? (
+            // Nama wajib diisi sebelum lanjut, karena disimpan di langkah terakhir.
+            <Button tone="cyan" className="flex-1" disabled={step === 1 && !name.trim()} onClick={() => setStep((value) => value + 1)}>
               Lanjut
             </Button>
           ) : (
