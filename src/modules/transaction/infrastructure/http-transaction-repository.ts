@@ -15,7 +15,7 @@ export class HttpTransactionRepository implements TransactionRepository {
         from: filter.from?.toISOString(),
         to: filter.to?.toISOString(),
         type: filter.type,
-        category: filter.category,
+        category_id: filter.categoryId,
         q: filter.q,
         limit: page.limit,
         cursor: page.cursor,

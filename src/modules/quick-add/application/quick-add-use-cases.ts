@@ -1,4 +1,5 @@
 import type { CreateTransaction } from "@/modules/transaction/application/create-transaction";
+import { defaultCategoryIdFor } from "@/modules/transaction/domain/category";
 import type { QuickDraft, QuickEntryParser, ReceiptReader } from "../domain/quick-draft";
 
 export class ParseQuickEntry {
@@ -35,7 +36,8 @@ export class SaveQuickDrafts {
         await this.createTransaction.execute({
           type: draft.type,
           amount: draft.amount,
-          category: draft.category,
+          // Parser Catat cepat menebak nama kategori bawaan, misalnya "kopi" menjadi Makanan.
+          categoryId: defaultCategoryIdFor(draft.type, draft.category),
           note: draft.name,
           accountId: draft.accountId,
           occurredAt,

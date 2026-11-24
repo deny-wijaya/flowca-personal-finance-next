@@ -12,7 +12,8 @@ import {
   calendarDayDiff,
 } from "@/shared/lib/format";
 import { isSameMonth, monthRange, parseMonthParam, shiftMonth, toMonthParam, type MonthRef } from "@/shared/lib/month";
-import { TRANSACTION_CATEGORIES, type Transaction } from "../../domain/transaction";
+import type { Category } from "../../domain/category";
+import type { Transaction } from "../../domain/transaction";
 import type { TransactionFilter, TransactionTotals } from "../../domain/transaction-repository";
 import { categoryInitial, categoryTone } from "./category-tone";
 
@@ -162,8 +163,18 @@ export const TYPE_FILTERS: { id: TypeFilter; label: string }[] = [
   { id: "in", label: "Pemasukan" },
 ];
 
-/** Semua kategori untuk filter Kategori di menu Transaksi. */
-export const ALL_CATEGORIES: readonly string[] = [...new Set([...TRANSACTION_CATEGORIES.expense, ...TRANSACTION_CATEGORIES.income])];
+/** Pilihan kategori untuk chip di form Tambah transaksi dan filter Kategori di menu Transaksi. */
+export type CategoryOptionVM = { id: string; name: string; type: Category["type"] };
+
+/** Kategori dari GET /categories menjadi pilihan siap tampil. */
+export function toCategoryOptions(categories: Category[]): CategoryOptionVM[] {
+  return categories.map(({ id, name, type }) => ({ id, name, type }));
+}
+
+/** Label pilihan filter Kategori. Nama "Lainnya" ada di kedua jenis, jadi jenisnya ikut ditulis. */
+export function categoryOptionLabel(option: CategoryOptionVM) {
+  return option.name === "Lainnya" ? `Lainnya (${option.type === "income" ? "pemasukan" : "pengeluaran"})` : option.name;
+}
 
 /**
  * Filter daftar di menu Transaksi. Disimpan di URL (`/transactions?month=2026-11&q=gojek&type=out`),
@@ -175,7 +186,7 @@ export type TransactionListFilters = {
   /** Kata pencarian, "" kalau tidak mencari. */
   q: string;
   type: TypeFilter;
-  /** Nama kategori, "" untuk semua kategori. */
+  /** Id kategori (misalnya "cat_expense_makanan"), "" untuk semua kategori. */
   category: string;
 };
 
@@ -191,7 +202,8 @@ export function parseTransactionFilters(params: Record<string, SearchParamValue>
     month: toMonthParam(parseMonthParam(params.month, now)),
     q: first(params.q).trim().slice(0, MAX_QUERY_LENGTH),
     type: type === "in" || type === "out" ? type : "all",
-    category: ALL_CATEGORIES.includes(category) ? category : "",
+    // Id kategori tidak dicek di sini: id yang tidak dikenal hanya menghasilkan daftar kosong dari backend.
+    category: category.slice(0, MAX_QUERY_LENGTH),
   };
 }
 
@@ -205,7 +217,7 @@ export function toTransactionFilter(filters: TransactionListFilters, now: Date):
   return {
     ...monthRange(parseMonthParam(filters.month, now)),
     type: filters.type === "all" ? undefined : filters.type === "in" ? "income" : "expense",
-    category: filters.category || undefined,
+    categoryId: filters.category || undefined,
     q: filters.q || undefined,
   };
 }

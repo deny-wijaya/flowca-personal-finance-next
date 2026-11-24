@@ -6,7 +6,14 @@ import { CategoryTile, categoryPillVariants } from "@/shared/ui/primitives/categ
 import { Checkbox } from "@/shared/ui/primitives/checkbox";
 import { Chip } from "@/shared/ui/primitives/chip";
 import { fieldVariants } from "@/shared/ui/primitives/field.variants";
-import { hasActiveFilter, TYPE_FILTERS, type TransactionListFilters, type TransactionRowVM } from "../view-models/transaction-view-model";
+import {
+  categoryOptionLabel,
+  hasActiveFilter,
+  TYPE_FILTERS,
+  type CategoryOptionVM,
+  type TransactionListFilters,
+  type TransactionRowVM,
+} from "../view-models/transaction-view-model";
 import { Amount } from "./amount";
 import { LoadMore, SearchBox } from "./transactions-mobile";
 import { useSearchQuery, useTransactionList, type TransactionFirstPage } from "./use-transaction-list";
@@ -19,7 +26,7 @@ type TransactionTableProps = {
   firstPage: TransactionFirstPage;
   /** Jumlah semua transaksi di bulan ini (dari GET /summary), untuk footer tabel. */
   totalCount: number;
-  categories: string[];
+  categories: CategoryOptionVM[];
   accounts: string[];
   /** "November 2026" untuk footer tabel. */
   monthLabel: string;
@@ -88,8 +95,13 @@ export function TransactionTable({ filters, firstPage, totalCount, categories, a
             </Chip>
           ))}
         </div>
-        <FilterSelect label="Kategori" value={filters.category} onChange={(category) => list.setFilters({ category })} options={categories} />
-        <FilterSelect label="Akun" value={account} onChange={setAccount} options={accounts} />
+        <FilterSelect
+          label="Kategori"
+          value={filters.category}
+          onChange={(category) => list.setFilters({ category })}
+          options={categories.map((option) => ({ value: option.id, label: categoryOptionLabel(option) }))}
+        />
+        <FilterSelect label="Akun" value={account} onChange={setAccount} options={accounts.map((name) => ({ value: name, label: name }))} />
       </div>
 
       {selectedCount > 0 && (
@@ -197,14 +209,16 @@ function BulkButton({ children }: { children: string }) {
   );
 }
 
-function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
+function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: { value: string; label: string }[] }) {
   return (
     <label className="flex items-center gap-2 text-13 font-bold">
       {label}
       <select value={value} onChange={(event) => onChange(event.target.value)} className={fieldVariants({ size: 42, className: "w-auto px-2.5" })}>
         <option value="">Semua</option>
         {options.map((option) => (
-          <option key={option}>{option}</option>
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
         ))}
       </select>
     </label>

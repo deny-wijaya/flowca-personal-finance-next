@@ -11,6 +11,7 @@ import {
   parseTransactionFilters,
   toTransactionFilter,
   toTransactionRow,
+  type CategoryOptionVM,
   type TransactionListFilters,
   type TransactionRowVM,
 } from "./view-models/transaction-view-model";
@@ -29,7 +30,7 @@ export async function createTransactionAction(_prev: CreateTransactionState, for
   const parsed = transactionFormSchema.safeParse({
     type: formData.get("type"),
     amount: String(formData.get("amount") ?? ""),
-    category: formData.get("category") || undefined,
+    categoryId: formData.get("categoryId") || undefined,
     accountId: formData.get("accountId") ?? "",
     toAccountId: formData.get("toAccountId") || undefined,
     date: formData.get("date"),
@@ -51,7 +52,7 @@ export async function createTransactionAction(_prev: CreateTransactionState, for
     await container.createTransaction().execute({
       type: input.type === "in" ? "income" : "expense",
       amount: input.amount,
-      category: input.category!,
+      categoryId: input.categoryId!,
       note: input.note,
       accountId: input.accountId,
       occurredAt: new Date(`${input.date}T${input.time}`),
@@ -59,6 +60,10 @@ export async function createTransactionAction(_prev: CreateTransactionState, for
   } catch (error) {
     if (error instanceof ValidationError) {
       return { status: "error", message: error.message, fieldErrors: error.field ? { [error.field]: [error.message] } : undefined };
+    }
+    if (error instanceof HttpError && error.status === 400 && categoryIdError(error)) {
+      // Kategori ditolak backend (tidak ditemukan atau jenisnya tidak cocok): tampilkan di bawah chip kategori.
+      return { status: "error", message: error.message, fieldErrors: { categoryId: [categoryIdError(error)!] } };
     }
     if (error instanceof HttpError) {
       console.error("[createTransactionAction]", error.status, error.code, error.message);
@@ -97,6 +102,39 @@ export async function loadMoreTransactionsAction(filters: TransactionListFilters
     if (error instanceof HttpError) {
       console.error("[loadMoreTransactionsAction]", error.status, error.code, error.message);
       return { status: "error", message: "Gagal memuat transaksi berikutnya. Coba lagi." };
+    }
+    throw error;
+  }
+}
+
+/** Pesan error untuk field category_id dari response 400 backend, kalau ada. */
+function categoryIdError(error: HttpError): string | undefined {
+  const parsed = z.object({ fieldErrors: z.object({ category_id: z.array(z.string()).min(1) }) }).safeParse(error.details);
+  return parsed.success ? parsed.data.fieldErrors.category_id[0] : undefined;
+}
+
+export type CreateCategoryResult =
+  | { status: "success"; category: CategoryOptionVM }
+  | { status: "error"; message: string };
+
+/**
+ * Server Action untuk chip "+ Kategori baru" di form Tambah transaksi.
+ * Membuat kategori kustom lewat POST /categories, lalu mengembalikannya supaya form bisa langsung memilihnya.
+ */
+export async function createCategoryAction(input: { name: string; type: "income" | "expense" }): Promise<CreateCategoryResult> {
+  const parsed = z.object({ name: z.string(), type: z.enum(["income", "expense"]) }).safeParse(input);
+  if (!parsed.success) return { status: "error", message: "Data kategori tidak valid." };
+
+  try {
+    const category = await container.createCategory().execute(parsed.data);
+    // Filter Kategori di menu Transaksi ikut memuat kategori baru ini.
+    revalidatePath("/transactions");
+    return { status: "success", category: { id: category.id, name: category.name, type: category.type } };
+  } catch (error) {
+    if (error instanceof ValidationError) return { status: "error", message: error.message };
+    if (error instanceof HttpError) {
+      console.error("[createCategoryAction]", error.status, error.code, error.message);
+      return { status: "error", message: "Gagal menyimpan kategori. Coba lagi." };
     }
     throw error;
   }

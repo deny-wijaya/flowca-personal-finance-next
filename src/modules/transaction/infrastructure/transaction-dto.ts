@@ -10,6 +10,7 @@ export const transactionDtoSchema = z.object({
   id: z.string(),
   type: z.enum(TRANSACTION_TYPES),
   amount: z.number().int(),
+  category_id: z.string(),
   category: z.string(),
   note: z.string().nullish(),
   account_id: z.string().nullish(),
@@ -26,7 +27,7 @@ export const summaryDtoSchema = z.object({
   transaction_count: z.number().int(),
   income_count: z.number().int(),
   expense_count: z.number().int(),
-  expense_by_category: z.array(z.object({ category: z.string(), amount: z.number().int() })),
+  expense_by_category: z.array(z.object({ category_id: z.string(), category: z.string(), amount: z.number().int() })),
 });
 
 export function toTransactionTotals(dto: z.infer<typeof summaryDtoSchema>): TransactionTotals {
@@ -37,7 +38,7 @@ export function toTransactionTotals(dto: z.infer<typeof summaryDtoSchema>): Tran
     transactionCount: dto.transaction_count,
     incomeCount: dto.income_count,
     expenseCount: dto.expense_count,
-    expenseByCategory: dto.expense_by_category,
+    expenseByCategory: dto.expense_by_category.map((item) => ({ categoryId: item.category_id, category: item.category, amount: item.amount })),
   };
 }
 
@@ -46,6 +47,7 @@ export function toTransaction(dto: TransactionDto): Transaction {
     id: dto.id,
     type: dto.type,
     amount: dto.amount,
+    categoryId: dto.category_id,
     category: dto.category,
     note: dto.note ?? undefined,
     accountId: dto.account_id ?? undefined,
@@ -57,7 +59,7 @@ export function toCreateTransactionBody(input: NewTransaction) {
   return {
     type: input.type,
     amount: input.amount,
-    category: input.category,
+    category_id: input.categoryId,
     note: input.note ?? null,
     account_id: input.accountId ?? null,
     occurred_at: input.occurredAt.toISOString(),

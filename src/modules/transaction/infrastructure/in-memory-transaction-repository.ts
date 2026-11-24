@@ -1,5 +1,8 @@
 import type { Page, PageRequest } from "@/shared/domain/pagination";
+import { ValidationError } from "@/shared/domain/errors";
+import { defaultCategoryIdFor } from "../domain/category";
 import type { NewTransaction, Transaction } from "../domain/transaction";
+import { InMemoryCategoryRepository } from "./in-memory-category-repository";
 import type { DateRange, TransactionFilter, TransactionRepository, TransactionTotals } from "../domain/transaction-repository";
 
 /**
@@ -10,7 +13,10 @@ import type { DateRange, TransactionFilter, TransactionRepository, TransactionTo
 export class InMemoryTransactionRepository implements TransactionRepository {
   private transactions: Transaction[];
 
-  constructor(seed: Transaction[] = []) {
+  constructor(
+    seed: Transaction[] = [],
+    private readonly categories: InMemoryCategoryRepository = new InMemoryCategoryRepository(),
+  ) {
     this.transactions = [...seed];
   }
 
@@ -24,7 +30,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
 
   async summarize(range: DateRange): Promise<TransactionTotals> {
     const rows = this.matching(range);
-    const expenseMap = new Map<string, number>();
+    const expenseMap = new Map<string, { categoryId: string; category: string; amount: number }>();
     let totalIncome = 0;
     let totalExpense = 0;
     let incomeCount = 0;
@@ -34,12 +40,12 @@ export class InMemoryTransactionRepository implements TransactionRepository {
         incomeCount += 1;
       } else {
         totalExpense += trx.amount;
-        expenseMap.set(trx.category, (expenseMap.get(trx.category) ?? 0) + trx.amount);
+        const item = expenseMap.get(trx.categoryId) ?? { categoryId: trx.categoryId, category: trx.category, amount: 0 };
+        item.amount += trx.amount;
+        expenseMap.set(trx.categoryId, item);
       }
     }
-    const expenseByCategory = [...expenseMap]
-      .map(([category, amount]) => ({ category, amount }))
-      .sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category));
+    const expenseByCategory = [...expenseMap.values()].sort((a, b) => b.amount - a.amount || a.category.localeCompare(b.category));
     return {
       totalIncome,
       totalExpense,
@@ -62,7 +68,13 @@ export class InMemoryTransactionRepository implements TransactionRepository {
   }
 
   async create(input: NewTransaction): Promise<Transaction> {
-    const transaction: Transaction = { ...input, id: crypto.randomUUID() };
+    // Meniru validasi backend: kategori harus ada dan jenisnya cocok.
+    const category = this.categories.find(input.categoryId);
+    if (!category) throw new ValidationError("Kategori tidak ditemukan", "categoryId");
+    if (category.type !== input.type) {
+      throw new ValidationError(`Kategori ${category.name} tidak bisa dipakai untuk ${input.type === "income" ? "pemasukan" : "pengeluaran"}`, "categoryId");
+    }
+    const transaction: Transaction = { ...input, category: category.name, id: crypto.randomUUID() };
     this.transactions.push(transaction);
     return transaction;
   }
@@ -74,7 +86,7 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       if (filter.from && time < filter.from.getTime()) return false;
       if (filter.to && time > filter.to.getTime()) return false;
       if (filter.type && trx.type !== filter.type) return false;
-      if (filter.category && trx.category !== filter.category) return false;
+      if (filter.categoryId && trx.categoryId !== filter.categoryId) return false;
       if (q && !`${trx.note ?? ""} ${trx.category}`.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -90,7 +102,7 @@ export function createSeedTransactions(now: Date = new Date()): Transaction[] {
     const date = new Date(now.getFullYear(), now.getMonth(), Math.min(day, now.getDate()), hour, minute);
     return date.getTime() > now.getTime() ? new Date(now.getTime() - 60_000) : date;
   };
-  const rows: NewTransaction[] = [
+  const rows: Omit<Transaction, "id" | "categoryId">[] = [
     { type: "income", amount: 6_500_000, category: "Gaji", note: "Gaji November", accountId: "bank", occurredAt: at(1, 9, 0) },
     { type: "expense", amount: 432_500, category: "Belanja", note: "Belanja bulanan", accountId: "bank", occurredAt: at(14, 10, 15) },
     { type: "income", amount: 1_200_000, category: "Freelance", note: "Proyek desain logo", accountId: "bank", occurredAt: at(15, 16, 0) },
@@ -99,5 +111,5 @@ export function createSeedTransactions(now: Date = new Date()): Transaction[] {
     { type: "expense", amount: 22_000, category: "Makanan", note: "Kopi susu", accountId: "bank", occurredAt: at(19, 8, 10) },
     { type: "expense", amount: 25_000, category: "Makanan", note: "Makan siang", accountId: "cash", occurredAt: at(19, 12, 30) },
   ];
-  return rows.map((row, index) => ({ ...row, id: `seed-${index + 1}` }));
+  return rows.map((row, index) => ({ ...row, categoryId: defaultCategoryIdFor(row.type, row.category), id: `seed-${index + 1}` }));
 }

@@ -7,18 +7,14 @@ import { ValidationError } from "@/shared/domain/errors";
 export const TRANSACTION_TYPES = ["income", "expense"] as const;
 export type TransactionType = (typeof TRANSACTION_TYPES)[number];
 
-export const TRANSACTION_CATEGORIES = {
-  income: ["Gaji", "Freelance", "Bonus", "Hadiah", "Investasi", "Lainnya"],
-  expense: ["Makanan", "Transportasi", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"],
-} as const satisfies Record<TransactionType, readonly string[]>;
-
-export type TransactionCategory = (typeof TRANSACTION_CATEGORIES)[TransactionType][number];
-
 export type Transaction = {
   id: string;
   type: TransactionType;
   /** Nominal dalam Rupiah, bilangan bulat positif (tanpa desimal). */
   amount: number;
+  /** Id kategori, misalnya "cat_expense_makanan". */
+  categoryId: string;
+  /** Nama kategori untuk ditampilkan, dikirim backend bersama transaksi. */
   category: string;
   /** Deskripsi singkat, mis. "Makan siang". Bila kosong, UI memakai nama kategori. */
   note?: string;
@@ -27,7 +23,8 @@ export type Transaction = {
   occurredAt: Date;
 };
 
-export type NewTransaction = Omit<Transaction, "id">;
+/** Data transaksi baru. Nama kategori tidak ikut, karena backend mengambilnya dari `categoryId`. */
+export type NewTransaction = Omit<Transaction, "id" | "category">;
 
 export const MAX_TRANSACTION_AMOUNT = 1_000_000_000_000;
 
@@ -38,10 +35,6 @@ export function assertValidNewTransaction(input: NewTransaction, now: Date = new
   }
   if (input.amount > MAX_TRANSACTION_AMOUNT) {
     throw new ValidationError("Nominal melebihi batas maksimal", "amount");
-  }
-  const allowedCategories: readonly string[] = TRANSACTION_CATEGORIES[input.type];
-  if (!allowedCategories.includes(input.category)) {
-    throw new ValidationError(`Kategori "${input.category}" tidak valid untuk ${input.type}`, "category");
   }
   if (input.occurredAt.getTime() > now.getTime()) {
     throw new ValidationError("Tanggal transaksi tidak boleh di masa depan", "occurredAt");

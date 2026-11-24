@@ -12,11 +12,11 @@ import { Icon } from "@/shared/ui/primitives/icon";
 import { Koko } from "@/shared/ui/primitives/koko";
 import { MoneyInput } from "@/shared/ui/primitives/money-input";
 import { Notice } from "@/shared/ui/primitives/notice";
-import { TRANSACTION_CATEGORIES } from "../../domain/transaction";
 import { createTransactionAction, type CreateTransactionState } from "../actions";
 import type { FormType } from "../transaction-form-schema";
 import { categoryInitial, categoryTone } from "../view-models/category-tone";
-import { formatSavedSummary } from "../view-models/transaction-view-model";
+import { formatSavedSummary, type CategoryOptionVM } from "../view-models/transaction-view-model";
+import { AddCategoryChip } from "./add-category-chip";
 import { Amount } from "./amount";
 
 const TYPES: { id: FormType; label: string; tone: "coral" | "cyan" | "pink"; sign: string }[] = [
@@ -29,6 +29,8 @@ type Account = { id: string; name: string };
 
 type AddTransactionFormProps = {
   accounts: Account[];
+  /** Kategori bawaan dan kustom dari GET /categories (kedua jenis). */
+  categories: CategoryOptionVM[];
   defaultDate: string;
   defaultTime: string;
   /** Tujuan tombol tutup & "Kembali ke beranda". */
@@ -38,11 +40,14 @@ type AddTransactionFormProps = {
 const initialState: CreateTransactionState = { status: "idle" };
 
 /** Isi sheet "Tambah transaksi": form → status "Tersimpan!". */
-export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHref }: AddTransactionFormProps) {
+export function AddTransactionForm({ accounts, categories: initialCategories, defaultDate, defaultTime, closeHref }: AddTransactionFormProps) {
   const [state, formAction, pending] = useActionState(createTransactionAction, initialState);
   const [type, setType] = useState<FormType>("out");
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
+  /** Id kategori yang dipilih. */
+  const [categoryId, setCategoryId] = useState("");
+  /** Kategori dari server, ditambah kategori yang baru dibuat lewat chip "+ Kategori baru". */
+  const [categoryOptions, setCategoryOptions] = useState(initialCategories);
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [toAccountId, setToAccountId] = useState(accounts[1]?.id ?? "");
   const [date, setDate] = useState(defaultDate);
@@ -54,13 +59,15 @@ export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHr
   const errors = state.status === "error" ? state.fieldErrors : undefined;
   const done = state.status === "success" && state.savedAt !== dismissedAt;
   const nameOf = (id: string) => accounts.find((account) => account.id === id)?.name ?? "";
-  const categories = type === "in" ? TRANSACTION_CATEGORIES.income : TRANSACTION_CATEGORIES.expense;
+  const categoryType = type === "in" ? "income" : "expense";
+  const categories = categoryOptions.filter((option) => option.type === categoryType);
+  const categoryName = categoryOptions.find((option) => option.id === categoryId)?.name;
 
   function reset() {
     if (state.status === "success") setDismissedAt(state.savedAt);
     setType("out");
     setAmount("");
-    setCategory("");
+    setCategoryId("");
     setNote("");
   }
 
@@ -74,7 +81,7 @@ export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHr
         <div className="flex w-full flex-col gap-1.5 rounded-2xl border-3 border-ink bg-paper p-4 shadow-hard-2">
           <Amount size={28} value={`${current.sign}Rp ${formatThousands(parseThousands(amount))}`} direction={type === "out" ? "out" : type === "in" ? "in" : "neutral"} />
           <div className="text-14 text-ink-600">
-            {formatSavedSummary({ category, account: nameOf(accountId), toAccount: nameOf(toAccountId), date, time, note, transfer: type === "tf" })}
+            {formatSavedSummary({ category: categoryName, account: nameOf(accountId), toAccount: nameOf(toAccountId), date, time, note, transfer: type === "tf" })}
           </div>
         </div>
         <div className="text-14 text-ink-600">Saldo dan anggaran sudah ikut diperbarui.</div>
@@ -103,7 +110,7 @@ export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHr
 
       <form action={formAction} noValidate className="m-0 flex min-h-0 flex-1 flex-col">
         <input type="hidden" name="type" value={type} />
-        <input type="hidden" name="category" value={category} />
+        <input type="hidden" name="categoryId" value={categoryId} />
         <input type="hidden" name="accountId" value={accountId} />
         {type === "tf" && <input type="hidden" name="toAccountId" value={toAccountId} />}
 
@@ -118,7 +125,7 @@ export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHr
                 selected={type === item.id}
                 onClick={() => {
                   setType(item.id);
-                  setCategory("");
+                  setCategoryId("");
                 }}
               >
                 {item.label}
@@ -142,16 +149,25 @@ export function AddTransactionForm({ accounts, defaultDate, defaultTime, closeHr
             <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
               <legend className={cn(fieldLabelClass, "mb-2 p-0")}>Kategori</legend>
               <div className="grid grid-cols-4 gap-2">
-                {categories.map((name) => (
-                  <Chip key={name} shape="tile" selected={category === name} onClick={() => setCategory(name)}>
-                    <CategoryTile initial={categoryInitial(name)} tone={categoryTone(name)} size={30} />
-                    <span className="text-11 font-bold">{name}</span>
+                {categories.map((option) => (
+                  <Chip key={option.id} shape="tile" selected={categoryId === option.id} onClick={() => setCategoryId(option.id)}>
+                    <CategoryTile initial={categoryInitial(option.name)} tone={categoryTone(option.name)} size={30} />
+                    <span className="text-11 font-bold">{option.name}</span>
                   </Chip>
                 ))}
+                <AddCategoryChip
+                  // key: kotak isian ditutup saat jenis transaksi diganti.
+                  key={categoryType}
+                  type={categoryType}
+                  onCreated={(created) => {
+                    setCategoryOptions((current) => [...current, created]);
+                    setCategoryId(created.id);
+                  }}
+                />
               </div>
-              {errors?.category && (
+              {errors?.categoryId && (
                 <div role="alert" className={cn(fieldMessageClass, "text-danger")}>
-                  {errors.category[0]}
+                  {errors.categoryId[0]}
                 </div>
               )}
             </fieldset>
