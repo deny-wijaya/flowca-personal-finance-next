@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { container } from "@/di/container";
 import { toUserVM } from "@/modules/auth/presentation/view-models/user-view-model";
 import { DashboardScreen } from "@/modules/dashboard/presentation/screens/dashboard-screen";
-import { toDashboardVM } from "@/modules/dashboard/presentation/view-models/dashboard-view-model";
+import { DASHBOARD_RECENT_LIMIT, toDashboardVM } from "@/modules/dashboard/presentation/view-models/dashboard-view-model";
 import { toMonthNav } from "@/modules/transaction/presentation/view-models/transaction-view-model";
 import { monthRange, parseMonthParam } from "@/shared/lib/month";
 import { loadTransactionContext } from "../_components/load-context";
@@ -24,14 +24,15 @@ async function DashboardContent({ searchParams }: Pick<PageProps<"/dashboard">, 
   await connection();
   const now = new Date();
   const month = parseMonthParam((await searchParams).month, now);
-  const [user, balances, transactions, budget, ctx] = await Promise.all([
+  const [user, balances, recent, summary, budget, ctx] = await Promise.all([
     container.auth().currentUser(),
     container.getAccountBalances().execute(),
-    container.listTransactions().execute(monthRange(month)),
+    container.listTransactions().execute(monthRange(month), { limit: DASHBOARD_RECENT_LIMIT }),
+    container.getMonthlySummary().execute(month),
     container.getBudgetOverview().execute(month),
     loadTransactionContext(now),
   ]);
 
-  const vm = toDashboardVM({ user: toUserVM(user), now, month: month.month, monthNav: toMonthNav("/dashboard", month, now), balances, transactions, budget, ctx });
+  const vm = toDashboardVM({ user: toUserVM(user), now, month: month.month, monthNav: toMonthNav("/dashboard", month, now), balances, summary, recent: recent.items, budget, ctx });
   return <DashboardScreen vm={vm} />;
 }

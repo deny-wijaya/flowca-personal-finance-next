@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HttpClient } from "./http-client";
 import { HttpError } from "./http-error";
@@ -48,7 +49,7 @@ describe("HttpClient X-Forwarded-For", () => {
       getClientIp: async () => "203.0.113.10",
     });
 
-    await http.request("/auth/login", { method: "POST", body: {}, schema: { safeParse: (data: unknown) => ({ success: true, data }) } as never });
+    await http.request("/auth/login", { method: "POST", body: {}, schema: z.unknown() });
 
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(new Headers(init.headers).get("X-Forwarded-For")).toBe("203.0.113.10");

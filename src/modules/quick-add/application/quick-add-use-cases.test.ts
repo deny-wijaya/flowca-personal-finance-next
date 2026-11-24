@@ -11,7 +11,7 @@ describe("SaveQuickDrafts", () => {
       { name: "Token listrik", category: "Tagihan", accountId: "bank", type: "expense", amount: 150_000, day: "yesterday" },
     ]);
 
-    const [saved] = await repo.list();
+    const [saved] = (await repo.list({}, { limit: 20 })).items;
     expect(saved).toMatchObject({ note: "Token listrik", category: "Tagihan", accountId: "bank", amount: 150_000 });
     expect(saved.occurredAt.getDate()).toBe(18);
   });

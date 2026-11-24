@@ -2,6 +2,7 @@ import type { AccountBalances } from "@/modules/account/application/get-account-
 import type { UserVM } from "@/modules/auth/presentation/view-models/user-view-model";
 import type { BudgetOverview } from "@/modules/budget/application/get-budget-overview";
 import { toBudgetRow, type BudgetRowVM } from "@/modules/budget/presentation/view-models/budget-view-model";
+import type { MonthlySummary } from "@/modules/transaction/application/get-monthly-summary";
 import type { Transaction } from "@/modules/transaction/domain/transaction";
 import {
   rowMetaWithDay,
@@ -34,18 +35,20 @@ type DashboardInput = {
   month: number;
   monthNav: MonthNavVM;
   balances: AccountBalances;
-  /** Transaksi bulan yang dilihat, terbaru di atas. */
-  transactions: Transaction[];
+  /** Total bulan yang dilihat, dari GET /summary. */
+  summary: MonthlySummary;
+  /** Beberapa transaksi terbaru bulan yang dilihat (satu halaman kecil), terbaru di atas. */
+  recent: Transaction[];
   budget: BudgetOverview;
   ctx: TransactionContext;
 };
 
-export function toDashboardVM({ user, now, month, monthNav, balances, transactions, budget, ctx }: DashboardInput): DashboardVM {
-  const incomes = transactions.filter((trx) => trx.type === "income");
-  const expenses = transactions.filter((trx) => trx.type === "expense");
-  const sum = (list: Transaction[]) => list.reduce((total, trx) => total + trx.amount, 0);
+/** Jumlah transaksi terbaru yang tampil di kartu transaksi terakhir (desktop 5, mobile 3). */
+export const DASHBOARD_RECENT_LIMIT = 5;
+
+export function toDashboardVM({ user, now, month, monthNav, balances, summary, recent, budget, ctx }: DashboardInput): DashboardVM {
   const monthShort = formatShortMonth(month);
-  const rows = transactions.map((trx) => toTransactionRow(trx, ctx));
+  const rows = recent.map((trx) => toTransactionRow(trx, ctx));
   const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   return {
@@ -56,14 +59,14 @@ export function toDashboardVM({ user, now, month, monthNav, balances, transactio
       total: formatRupiah(balances.total),
       caption: `${balances.accounts.length} akun · ${balances.accounts.map((account) => account.name).join(", ")}`,
     },
-    income: { label: `Masuk · ${monthShort}`, value: formatRupiah(sum(incomes)), caption: `${incomes.length} transaksi` },
-    expense: { label: `Keluar · ${monthShort}`, value: formatRupiah(sum(expenses)), caption: `${expenses.length} transaksi` },
+    income: { label: `Masuk · ${monthShort}`, value: formatRupiah(summary.totalIncome), caption: `${summary.incomeCount} transaksi` },
+    expense: { label: `Keluar · ${monthShort}`, value: formatRupiah(summary.totalExpense), caption: `${summary.expenseCount} transaksi` },
     budget: {
       remaining: `${budget.remaining < 0 ? "−" : ""}${formatRupiah(budget.remaining)}`,
       caption: `dari ${formatRupiah(budget.totalLimit)}`,
       rows: budget.items.map(toBudgetRow),
     },
     recentMobile: rows.slice(0, 3).map((row) => ({ ...row, meta: rowMetaWithRelativeTime(row) })),
-    recentDesktop: rows.slice(0, 5).map((row) => ({ ...row, meta: rowMetaWithDay(row) })),
+    recentDesktop: rows.slice(0, DASHBOARD_RECENT_LIMIT).map((row) => ({ ...row, meta: rowMetaWithDay(row) })),
   };
 }

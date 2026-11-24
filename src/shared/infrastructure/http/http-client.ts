@@ -30,6 +30,12 @@ type RequestOptions<TSchema extends z.ZodType> = {
   schema: TSchema;
 };
 
+/** Objek `page` di response endpoint daftar (API-CONTRACT.md bagian 1). */
+const pageSchema = z.object({ limit: z.number().int(), next_cursor: z.string().nullable() });
+
+/** Hasil `requestPage`: satu halaman item yang sudah divalidasi, plus cursor halaman berikutnya. */
+export type PageResult<TItem> = { items: TItem[]; nextCursor: string | null };
+
 /** Bentuk error standar dari backend: { error: { code, message, details } } */
 const apiErrorSchema = z.object({
   error: z.object({
@@ -47,10 +53,29 @@ const apiErrorSchema = z.object({
 export class HttpClient {
   constructor(private readonly config: HttpClientConfig) {}
 
-  async request<TSchema extends z.ZodType>(
+  /** Request biasa. Mengembalikan isi `data` yang sudah divalidasi dengan `schema`. */
+  async request<TSchema extends z.ZodType>(path: string, options: RequestOptions<TSchema>): Promise<z.infer<TSchema>> {
+    const envelope = (await this.send(path, options, z.object({ data: options.schema }))) as { data: z.infer<TSchema> };
+    return envelope.data;
+  }
+
+  /**
+   * Request ke endpoint daftar yang memakai pagination. `schema` memvalidasi SATU item di `data`.
+   * Mengembalikan item halaman ini dan `next_cursor` untuk mengambil halaman berikutnya.
+   */
+  async requestPage<TSchema extends z.ZodType>(
     path: string,
-    { method = "GET", query, body, schema }: RequestOptions<TSchema>,
-  ): Promise<z.infer<TSchema>> {
+    options: Omit<RequestOptions<TSchema>, "method" | "body">,
+  ): Promise<PageResult<z.infer<TSchema>>> {
+    const envelope = (await this.send(path, options, z.object({ data: z.array(options.schema), page: pageSchema }))) as {
+      data: z.infer<TSchema>[];
+      page: z.infer<typeof pageSchema>;
+    };
+    return { items: envelope.data, nextCursor: envelope.page.next_cursor };
+  }
+
+  /** Mengirim request dan mengembalikan seluruh body response setelah divalidasi dengan `envelopeSchema`. */
+  private async send(path: string, { method = "GET", query, body }: Omit<RequestOptions<z.ZodType>, "schema">, envelopeSchema: z.ZodType): Promise<unknown> {
     const url = this.buildUrl(path, query);
     const headers = new Headers({ Accept: "application/json" });
     if (body !== undefined) headers.set("Content-Type", "application/json");
@@ -92,9 +117,8 @@ export class HttpClient {
       throw new HttpError(`Request gagal (${response.status})`, response.status);
     }
 
-    // Kontrak sukses dari backend: { data: ... }
-    const envelope = z.object({ data: z.unknown() }).safeParse(json);
-    const parsed = envelope.success ? schema.safeParse(envelope.data.data) : envelope;
+    // Kontrak sukses dari backend: { data: ... }, ditambah { page } untuk endpoint daftar.
+    const parsed = envelopeSchema.safeParse(json);
     if (!parsed.success) {
       throw new HttpError(
         "Format response API tidak sesuai kontrak",
@@ -103,7 +127,7 @@ export class HttpClient {
         parsed.error.issues,
       );
     }
-    return parsed.data as z.infer<TSchema>;
+    return parsed.data;
   }
 
   private buildUrl(path: string, query?: Record<string, QueryValue>) {

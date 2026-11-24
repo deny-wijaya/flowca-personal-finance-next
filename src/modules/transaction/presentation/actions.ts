@@ -4,8 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { container } from "@/di/container";
 import { ValidationError } from "@/shared/domain/errors";
+import { DEFAULT_PAGE_LIMIT } from "@/shared/domain/pagination";
 import { HttpError } from "@/shared/infrastructure/http/http-error";
 import { transactionFormSchema } from "./transaction-form-schema";
+import {
+  parseTransactionFilters,
+  toTransactionFilter,
+  toTransactionRow,
+  type TransactionListFilters,
+  type TransactionRowVM,
+} from "./view-models/transaction-view-model";
 
 export type CreateTransactionState =
   | { status: "idle" }
@@ -61,4 +69,35 @@ export async function createTransactionAction(_prev: CreateTransactionState, for
 
   revalidatePath("/", "layout");
   return { status: "success", savedAt: Date.now() };
+}
+
+export type LoadMoreTransactionsResult =
+  | { status: "success"; rows: TransactionRowVM[]; nextCursor: string | null }
+  | { status: "error"; message: string };
+
+/**
+ * Server Action untuk tombol "Muat lebih banyak" di menu Transaksi (daftar mobile dan tabel desktop).
+ * Mengambil halaman berikutnya dari GET /transactions memakai `cursor` dari halaman sebelumnya,
+ * dengan filter yang sama, lalu mengembalikan baris yang sudah siap ditampilkan.
+ */
+export async function loadMoreTransactionsAction(filters: TransactionListFilters, cursor: string): Promise<LoadMoreTransactionsResult> {
+  // Input Server Action datang dari browser, jadi dibaca ulang lewat parser yang sama dengan URL.
+  const now = new Date();
+  const safeFilters = parseTransactionFilters({ ...filters }, now);
+  if (typeof cursor !== "string" || cursor === "") return { status: "error", message: "Halaman berikutnya tidak ditemukan." };
+
+  try {
+    const [page, balances] = await Promise.all([
+      container.listTransactions().execute(toTransactionFilter(safeFilters, now), { limit: DEFAULT_PAGE_LIMIT, cursor }),
+      container.getAccountBalances().execute(),
+    ]);
+    const ctx = { now, accountNames: new Map(balances.accounts.map((account) => [account.id, account.name])) };
+    return { status: "success", rows: page.items.map((trx) => toTransactionRow(trx, ctx)), nextCursor: page.nextCursor };
+  } catch (error) {
+    if (error instanceof HttpError) {
+      console.error("[loadMoreTransactionsAction]", error.status, error.code, error.message);
+      return { status: "error", message: "Gagal memuat transaksi berikutnya. Coba lagi." };
+    }
+    throw error;
+  }
 }
