@@ -9,7 +9,7 @@ const trackVariants = cva("grid border-ink", {
       md: "h-4.5 gap-0.75 border-3 bg-paper p-0.5",
       lg: "h-5.5 gap-0.5 border-3 bg-paper p-0.5",
     },
-    segments: { 4: "grid-cols-4", 10: "grid-cols-10", 20: "grid-cols-20" },
+    segments: { 3: "grid-cols-3", 4: "grid-cols-4", 10: "grid-cols-10", 20: "grid-cols-20" },
   },
   defaultVariants: { size: "sm", segments: 10 },
 });

@@ -34,6 +34,13 @@ export class AuthUseCases {
     return this.gateway.register({ ...input, name: input.name.trim(), email: input.email.trim() });
   }
 
+  updateName(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) throw new ValidationError("Nama wajib diisi.", "name");
+    if (trimmed.length > 100) throw new ValidationError("Nama maksimal 100 karakter.", "name");
+    return this.gateway.updateName(trimmed);
+  }
+
   requestPasswordReset(email: string) {
     if (!isValidEmail(email)) throw new ValidationError("Format email belum benar.", "email");
     return this.gateway.requestPasswordReset(email.trim());

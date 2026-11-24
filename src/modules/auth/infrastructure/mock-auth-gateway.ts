@@ -52,6 +52,11 @@ export class MockAuthGateway implements AuthGateway {
     return { ...DEMO_USER, name: input.name, email: input.email, signInMethod: "email" } as const;
   }
 
+  async updateName(name: string) {
+    await this.wait();
+    return { ...DEMO_USER, name };
+  }
+
   async requestPasswordReset() {
     await this.wait();
   }

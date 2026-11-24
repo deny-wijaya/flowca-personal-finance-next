@@ -177,3 +177,31 @@ describe("HttpAuthGateway rate limit login", () => {
     expect(error).toMatchObject({ field: "form", message });
   });
 });
+
+describe("HttpAuthGateway.updateName", () => {
+  const userDto = { id: "usr_1", name: "Rani", email: "rani@email.com", created_at: "2026-11-21T03:00:00.000Z" };
+
+  it("mengirim PATCH /auth/me dengan { name } dan mengembalikan profil baru", async () => {
+    const { fetchMock, gateway } = setup(async () => jsonResponse({ data: userDto }));
+
+    const profile = await gateway.updateName("Rani");
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("https://api.example.test/api/v1/auth/me");
+    expect(init?.method).toBe("PATCH");
+    expect(JSON.parse(String(init?.body))).toEqual({ name: "Rani" });
+    expect(profile).toMatchObject({ name: "Rani", email: "rani@email.com" });
+  });
+
+  it("400 nama kosong menjadi ValidationError di field name", async () => {
+    const { gateway } = setup(async () =>
+      jsonResponse(
+        { error: { code: "VALIDATION_ERROR", message: "Data request tidak valid", details: { fieldErrors: { name: ["Nama wajib diisi"] } } } },
+        400,
+      ),
+    );
+    const error = await errorOf(gateway.updateName(" "));
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({ field: "name", message: "Nama wajib diisi" });
+  });
+});

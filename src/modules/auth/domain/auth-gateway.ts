@@ -15,6 +15,8 @@ export interface AuthGateway {
   signInWithGoogle(): Promise<GoogleSignInResult>;
   completeGoogleCallback(input: { code?: string; state?: string; error?: string }): Promise<GoogleCallbackResult>;
   register(input: { name: string; email: string; password: string }): Promise<UserProfile>;
+  /** Mengganti nama user yang sedang login (PATCH /auth/me), dari langkah "Nama tampilan" di onboarding. */
+  updateName(name: string): Promise<UserProfile>;
   requestPasswordReset(email: string): Promise<void>;
   verifyResetToken(token: string): Promise<ResetTokenStatus>;
   resetPassword(input: { token: string; password: string }): Promise<void>;

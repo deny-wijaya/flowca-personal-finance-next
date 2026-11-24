@@ -55,6 +55,16 @@ export class HttpAuthGateway implements AuthGateway {
     }
   }
 
+  /** PATCH /auth/me. Nama kosong atau terlalu panjang (400) menjadi ValidationError di field name. */
+  async updateName(name: string): Promise<UserProfile> {
+    try {
+      const dto = await this.http.request("/auth/me", { method: "PATCH", body: { name }, schema: userDtoSchema });
+      return toUserProfile(dto);
+    } catch (error) {
+      throw toFormError(error);
+    }
+  }
+
   /** Profil user pemilik token di cookie (`GET /auth/me`). Dipakai kartu profil dan sapaan Catat cepat. */
   async currentUser(): Promise<UserProfile> {
     const dto = await this.http.request("/auth/me", { schema: userDtoSchema });
