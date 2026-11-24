@@ -44,7 +44,7 @@ export function TransactionsMobile({ filters, firstPage }: { filters: Transactio
               <TransactionRowList>
                 {group.rows.map((row) => (
                   <li key={row.id}>
-                    <TransactionRow row={row} meta={row.meta} href={`/transactions#${row.id}`} />
+                    <TransactionRow row={row} meta={row.meta} href={`/transactions/edit?id=${encodeURIComponent(row.id)}`} />
                   </li>
                 ))}
               </TransactionRowList>

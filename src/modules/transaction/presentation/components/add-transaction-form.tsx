@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState, useTransition } from "react";
 import { cn } from "@/shared/lib/cn";
 import { MINUS, parseThousands, formatThousands } from "@/shared/lib/format";
 import { Button, ButtonLink } from "@/shared/ui/primitives/button";
@@ -13,7 +13,7 @@ import { Icon } from "@/shared/ui/primitives/icon";
 import { Koko } from "@/shared/ui/primitives/koko";
 import { MoneyInput } from "@/shared/ui/primitives/money-input";
 import { Notice } from "@/shared/ui/primitives/notice";
-import { createTransactionAction, type CreateTransactionState } from "../actions";
+import { createTransactionAction, deleteTransactionAction, updateTransactionAction, type CreateTransactionState } from "../actions";
 import type { FormType } from "../transaction-form-schema";
 import { categoryInitial, categoryTone } from "../view-models/category-tone";
 import { formatSavedSummary, type CategoryOptionVM } from "../view-models/transaction-view-model";
@@ -28,7 +28,24 @@ const TYPES: { id: FormType; label: string; tone: "coral" | "cyan" | "pink"; sig
 
 type Account = { id: string; name: string };
 
+/** Isi awal form saat mengubah transaksi yang sudah ada (/transactions/edit?id=...). */
+export type TransactionFormInitial = {
+  type: "out" | "in";
+  /** "1.500.000" */
+  amount: string;
+  categoryId: string;
+  /** "" untuk transaksi lama yang belum punya akun. */
+  accountId: string;
+  /** "2026-11-24" */
+  date: string;
+  /** "09:30" */
+  time: string;
+  note: string;
+};
+
 type AddTransactionFormProps = {
+  /** Diisi saat mengubah transaksi: form terisi data lama, dan muncul tombol Hapus transaksi. */
+  edit?: { id: string; initial: TransactionFormInitial };
   accounts: Account[];
   /** Kategori bawaan dan kustom dari GET /categories (kedua jenis). */
   categories: CategoryOptionVM[];
@@ -41,19 +58,21 @@ type AddTransactionFormProps = {
 const initialState: CreateTransactionState = { status: "idle" };
 
 /** Isi sheet "Tambah transaksi": form → status "Tersimpan!". */
-export function AddTransactionForm({ accounts, categories: initialCategories, defaultDate, defaultTime, closeHref }: AddTransactionFormProps) {
-  const [state, formAction, pending] = useActionState(createTransactionAction, initialState);
-  const [type, setType] = useState<FormType>("out");
-  const [amount, setAmount] = useState("");
+export function AddTransactionForm({ edit, accounts, categories: initialCategories, defaultDate, defaultTime, closeHref }: AddTransactionFormProps) {
+  const initial = edit?.initial;
+  // Saat mengubah, id transaksi diikat ke Server Action supaya form tetap mengirim FormData biasa.
+  const [state, formAction, pending] = useActionState(edit ? updateTransactionAction.bind(null, edit.id) : createTransactionAction, initialState);
+  const [type, setType] = useState<FormType>(initial?.type ?? "out");
+  const [amount, setAmount] = useState(initial?.amount ?? "");
   /** Id kategori yang dipilih. */
-  const [categoryId, setCategoryId] = useState("");
+  const [categoryId, setCategoryId] = useState(initial?.categoryId ?? "");
   /** Kategori dari server, ditambah kategori yang baru dibuat lewat chip "+ Kategori baru". */
   const [categoryOptions, setCategoryOptions] = useState(initialCategories);
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
+  const [accountId, setAccountId] = useState(initial ? initial.accountId : (accounts[0]?.id ?? ""));
   const [toAccountId, setToAccountId] = useState(accounts[1]?.id ?? "");
-  const [date, setDate] = useState(defaultDate);
-  const [time, setTime] = useState(defaultTime);
-  const [note, setNote] = useState("");
+  const [date, setDate] = useState(initial?.date ?? defaultDate);
+  const [time, setTime] = useState(initial?.time ?? defaultTime);
+  const [note, setNote] = useState(initial?.note ?? "");
   const [dismissedAt, setDismissedAt] = useState<number>();
 
   const current = TYPES.find((item) => item.id === type)!;
@@ -102,7 +121,7 @@ export function AddTransactionForm({ accounts, categories: initialCategories, de
     <>
       <div className="flex items-center justify-between px-5 pt-2 pb-2.5">
         <h1 id="add-title" className="m-0 font-display text-24 font-bold">
-          Tambah transaksi
+          {edit ? "Ubah transaksi" : "Tambah transaksi"}
         </h1>
         <IconLink href={closeHref} aria-label="Tutup">
           <Icon name="x" size={18} strokeWidth={3.2} />
@@ -116,8 +135,9 @@ export function AddTransactionForm({ accounts, categories: initialCategories, de
         {type === "tf" && <input type="hidden" name="toAccountId" value={toAccountId} />}
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-5 pt-1 pb-4">
-          <div role="radiogroup" aria-label="Jenis transaksi" className="grid grid-cols-3 gap-0.75 rounded-xl border-3 border-ink bg-paper p-0.75">
-            {TYPES.map((item) => (
+          <div role="radiogroup" aria-label="Jenis transaksi" className={cn("grid gap-0.75 rounded-xl border-3 border-ink bg-paper p-0.75", edit ? "grid-cols-2" : "grid-cols-3")}>
+            {/* Transaksi yang sudah ada tidak bisa diubah menjadi transfer. */}
+            {TYPES.filter((item) => !edit || item.id !== "tf").map((item) => (
               <Chip
                 key={item.id}
                 behavior="radio"
@@ -201,11 +221,12 @@ export function AddTransactionForm({ accounts, categories: initialCategories, de
           </div>
 
           {state.status === "error" && !errors && <Notice tone="error">{state.message}</Notice>}
+          {edit && <DeleteTransaction id={edit.id} />}
         </div>
 
         <div className="border-t-3 border-ink bg-paper px-5 pt-3 pb-5">
           <Button type="submit" tone="orange" size={56} block loading={pending}>
-            {pending ? "Menyimpan…" : "Simpan transaksi"}
+            {pending ? "Menyimpan…" : edit ? "Simpan perubahan" : "Simpan transaksi"}
           </Button>
         </div>
       </form>
@@ -258,6 +279,64 @@ function DateTimeField({ id, name, type, label, value, onChange, error }: { id: 
         className={fieldVariants({ size: 46, invalid: Boolean(error), className: "px-2.5 text-15" })}
       />
       {error && <div className={cn(fieldMessageClass, "text-danger")}>{error}</div>}
+    </div>
+  );
+}
+
+/**
+ * Tombol "Hapus transaksi" di sheet ubah. Ketukan pertama hanya membuka konfirmasi di tempat yang sama,
+ * supaya transaksi tidak terhapus karena salah ketuk (PRD A3). "Ya, hapus" memanggil Server Action, yang
+ * kembali ke menu Transaksi kalau berhasil.
+ */
+function DeleteTransaction({ id }: { id: string }) {
+  const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string>();
+  const [deleting, startDeleting] = useTransition();
+  const boxRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+
+  // Di HP, kotak konfirmasi muncul di dekat bawah sheet dan bisa tertutup tombol "Simpan perubahan" yang
+  // menempel di bawah. Kotaknya digulir ke area terlihat, dan fokus dipindah ke Batal (pilihan yang aman).
+  useEffect(() => {
+    if (!confirming) return;
+    boxRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    cancelRef.current?.focus({ preventScroll: true });
+  }, [confirming]);
+
+  if (!confirming) {
+    return (
+      <Button tone="paper" size={46} font="body-xs" className="self-start text-danger" onClick={() => setConfirming(true)}>
+        Hapus transaksi
+      </Button>
+    );
+  }
+
+  return (
+    <div ref={boxRef} role="alertdialog" aria-labelledby="delete-trx-title" className="flex flex-col gap-2.5 rounded-xl border-3 border-ink bg-coral-50 p-3.5">
+      <div id="delete-trx-title" className="text-15 font-bold">
+        Hapus transaksi ini? Saldo akun dan ringkasan bulan ini ikut berubah.
+      </div>
+      {error && <div className="text-14 font-semibold text-danger">{error}</div>}
+      <div className="flex gap-2">
+        <Button
+          tone="coral"
+          size={44}
+          font="body-xs"
+          loading={deleting}
+          onClick={() =>
+            startDeleting(async () => {
+              // Kalau berhasil, action langsung redirect. Yang kembali ke sini hanya error.
+              const result = await deleteTransactionAction(id);
+              setError(result.message);
+            })
+          }
+        >
+          Ya, hapus
+        </Button>
+        <Button ref={cancelRef} tone="paper" size={44} font="body-xs" disabled={deleting} onClick={() => setConfirming(false)}>
+          Batal
+        </Button>
+      </div>
     </div>
   );
 }

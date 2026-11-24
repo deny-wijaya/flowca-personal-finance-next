@@ -19,6 +19,7 @@ import { ParseQuickEntry, ReadReceipt, SaveQuickDrafts } from "@/modules/quick-a
 import { MockReceiptReader, RuleBasedQuickEntryParser } from "@/modules/quick-add/infrastructure/rule-based-quick-entry-parser";
 import { CreateCategory } from "@/modules/transaction/application/create-category";
 import { CreateTransaction } from "@/modules/transaction/application/create-transaction";
+import { BulkEditTransactions, DeleteTransaction, GetTransaction, UpdateTransaction } from "@/modules/transaction/application/edit-transaction";
 import { GetMonthlySummary } from "@/modules/transaction/application/get-monthly-summary";
 import { ListCategories } from "@/modules/transaction/application/list-categories";
 import { ListTransactions } from "@/modules/transaction/application/list-transactions";
@@ -112,6 +113,10 @@ export const container = {
 
   listTransactions: () => new ListTransactions(getTransactionRepository()),
   createTransaction: () => new CreateTransaction(getTransactionRepository()),
+  getTransaction: () => new GetTransaction(getTransactionRepository()),
+  updateTransaction: () => new UpdateTransaction(getTransactionRepository()),
+  deleteTransaction: () => new DeleteTransaction(getTransactionRepository()),
+  bulkEditTransactions: () => new BulkEditTransactions(getTransactionRepository()),
   getMonthlySummary: () => new GetMonthlySummary(getTransactionRepository()),
   listCategories: () => new ListCategories(getCategoryRepository()),
   createCategory: () => new CreateCategory(getCategoryRepository()),

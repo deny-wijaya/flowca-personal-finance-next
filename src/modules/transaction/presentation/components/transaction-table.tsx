@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/shared/lib/cn";
 import { CategoryTile, categoryPillVariants } from "@/shared/ui/primitives/category-tile";
@@ -15,6 +16,7 @@ import {
   type TransactionRowVM,
 } from "../view-models/transaction-view-model";
 import { Amount } from "./amount";
+import { BulkActionBar } from "./bulk-action-bar";
 import { LoadMore, SearchBox } from "./transactions-mobile";
 import { useSearchQuery, useTransactionList, type TransactionFirstPage } from "./use-transaction-list";
 
@@ -109,18 +111,13 @@ export function TransactionTable({ filters, firstPage, totalCount, categories, a
       </div>
 
       {selectedCount > 0 && (
-        <div role="region" aria-label="Aksi untuk transaksi terpilih" className="flex flex-wrap items-center gap-3 rounded-xl bg-ink px-3.5 py-2.5 text-cream">
-          <span className="flex-1 text-14 font-bold">{selectedCount} transaksi dipilih</span>
-          {/* TODO(transaction): sambungkan ke use case ubah kategori/akun & hapus saat endpoint PATCH/DELETE tersedia (PRD fase A3). */}
-          <BulkButton>Ubah kategori</BulkButton>
-          <BulkButton>Pindah akun</BulkButton>
-          <button type="button" className="h-10 cursor-pointer rounded-md border-2 border-ink bg-coral px-3.5 font-body text-14 font-bold text-ink">
-            Hapus
-          </button>
-          <button type="button" onClick={() => setSelected(new Set())} className="h-10 cursor-pointer border-0 bg-transparent px-2.5 font-body text-14 font-semibold text-cream underline">
-            Batal
-          </button>
-        </div>
+        <BulkActionBar
+          selected={rows.filter((row) => selected.has(row.id)).map((row) => ({ id: row.id, direction: row.direction }))}
+          categories={categories}
+          accounts={accounts}
+          onDone={() => setSelected(new Set())}
+          onCancel={() => setSelected(new Set())}
+        />
       )}
 
       <div aria-busy={list.isFiltering} className="overflow-x-auto rounded-2xl border-3 border-ink bg-paper shadow-hard-3">
@@ -163,7 +160,12 @@ export function TransactionTable({ filters, firstPage, totalCount, categories, a
                     <div className="font-bold">{row.dayLabel}</div>
                     <div className="text-12 text-ink-600">{row.time}</div>
                   </td>
-                  <td className="px-2 py-2.5 font-bold">{row.name}</td>
+                  <td className="px-2 py-2.5 font-bold">
+                    {/* Membuka sheet "Ubah transaksi" (ubah atau hapus satu transaksi). */}
+                    <Link href={`/transactions/edit?id=${encodeURIComponent(row.id)}`} className="text-ink underline decoration-sand-200 underline-offset-4 hover:decoration-ink">
+                      {row.name}
+                    </Link>
+                  </td>
                   <td className="px-2 py-2.5">
                     <CategoryPill row={row} />
                   </td>
@@ -201,14 +203,6 @@ function SortButton({ onClick, arrow, className, children }: { onClick: () => vo
   return (
     <button type="button" onClick={onClick} className={cn("flex h-11 cursor-pointer items-center gap-1 border-0 bg-transparent font-body text-13 font-bold text-ink", className)}>
       {children} <span aria-hidden="true">{arrow}</span>
-    </button>
-  );
-}
-
-function BulkButton({ children }: { children: string }) {
-  return (
-    <button type="button" className="h-10 cursor-pointer rounded-md border-2 border-cream bg-transparent px-3.5 font-body text-14 font-bold text-cream">
-      {children}
     </button>
   );
 }

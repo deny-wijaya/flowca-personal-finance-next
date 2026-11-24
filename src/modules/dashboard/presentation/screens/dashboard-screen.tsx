@@ -51,7 +51,7 @@ function MobileDashboard({ vm }: { vm: DashboardVM }) {
               <TransactionRowList>
                 {vm.recentMobile.map((row) => (
                   <li key={row.id}>
-                    <TransactionRow row={row} meta={row.meta} href="/transactions" density="roomy" />
+                    <TransactionRow row={row} meta={row.meta} href={`/transactions/edit?id=${encodeURIComponent(row.id)}`} density="roomy" />
                   </li>
                 ))}
               </TransactionRowList>
@@ -101,7 +101,7 @@ function DesktopDashboard({ vm }: { vm: DashboardVM }) {
             <TransactionRowList>
               {vm.recentDesktop.map((row) => (
                 <li key={row.id}>
-                  <TransactionRow row={row} meta={row.meta} href="/transactions" density="desktop" tileSize={38} />
+                  <TransactionRow row={row} meta={row.meta} href={`/transactions/edit?id=${encodeURIComponent(row.id)}`} density="desktop" tileSize={38} />
                 </li>
               ))}
             </TransactionRowList>
