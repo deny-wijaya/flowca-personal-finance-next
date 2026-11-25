@@ -19,9 +19,12 @@ export function toUserProfile(dto: UserDto): UserProfile {
   return { id: dto.id, name: dto.name, email: dto.email, signInMethod: "email" };
 }
 
-/** Body request `POST /auth/register`. `confirm` dan `terms` hanya dicek di frontend, jadi tidak dikirim. */
+/**
+ * Body request `POST /auth/register`. `confirm` hanya dicek di frontend. Centang persetujuan dikirim sebagai
+ * `terms_accepted: true`; registerAction sudah menolak form yang belum dicentang sebelum sampai ke sini.
+ */
 export function toRegisterBody(input: { name: string; email: string; password: string }) {
-  return { name: input.name, email: input.email, password: input.password };
+  return { name: input.name, email: input.email, password: input.password, terms_accepted: true };
 }
 
 /** Response `POST /auth/login`. */
