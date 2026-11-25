@@ -104,7 +104,16 @@ function toFormError(error: unknown): unknown {
   if (error.status === 429) return new ValidationError(error.message, "form");
   if (error.status === 400 || error.status === 409) {
     const [first] = toFieldMessages(error.details);
-    return new ValidationError(first?.message ?? error.message, first?.field ?? "form");
+    return new ValidationError(first?.message ?? error.message, toFormField(first?.field));
   }
+  // Server error (misalnya database mati): tampilkan pesan di form, bukan halaman error penuh,
+  // supaya user tetap di layar Login atau Daftar dan bisa mencoba lagi.
+  if (error.status >= 500) return new ValidationError("Server sedang bermasalah. Coba lagi sebentar lagi.", "form");
   return error;
+}
+
+/** Nama field backend menjadi nama field di form Daftar ("terms_accepted" ditampilkan di bawah centang "terms"). */
+function toFormField(field: string | undefined): string {
+  if (!field) return "form";
+  return field === "terms_accepted" ? "terms" : field;
 }

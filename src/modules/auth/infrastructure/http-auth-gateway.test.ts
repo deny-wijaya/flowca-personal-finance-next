@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ValidationError } from "@/shared/domain/errors";
 import { HttpClient } from "@/shared/infrastructure/http/http-client";
-import { HttpError } from "@/shared/infrastructure/http/http-error";
 import type { AccessTokenStore } from "@/shared/infrastructure/session/access-token-cookie";
 import { HttpAuthGateway } from "./http-auth-gateway";
 import { MockAuthGateway } from "./mock-auth-gateway";
@@ -59,7 +58,7 @@ describe("HttpAuthGateway.register", () => {
     const [url, init] = fetchMock.mock.calls[0];
     expect(String(url)).toBe("https://api.example.test/api/v1/auth/register");
     expect(init?.method).toBe("POST");
-    expect(JSON.parse(String(init?.body))).toEqual(rani);
+    expect(JSON.parse(String(init?.body))).toEqual({ ...rani, terms_accepted: true });
     expect(user).toEqual({ id: "usr_1", name: "Rani Putri", email: "rani@email.com", signInMethod: "email" });
   });
 
@@ -99,14 +98,32 @@ describe("HttpAuthGateway.register", () => {
     expect(error).toMatchObject({ field: "form" });
   });
 
-  it("error 500 diteruskan apa adanya ke error boundary", async () => {
+  it("error 500 menjadi pesan di form, bukan halaman error penuh", async () => {
     const { gateway } = setup(async () =>
       jsonResponse({ error: { code: "INTERNAL_ERROR", message: "Terjadi kesalahan di server" } }, 500),
     );
 
     const error = await errorOf(gateway.register(rani));
-    expect(error).toBeInstanceOf(HttpError);
-    expect(error).toMatchObject({ status: 500 });
+    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toMatchObject({ field: "form", message: "Server sedang bermasalah. Coba lagi sebentar lagi." });
+  });
+
+  it("mengirim terms_accepted: true, dan error terms_accepted tampil di field terms", async () => {
+    const { fetchMock, gateway } = setup(async () =>
+      jsonResponse(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Data request tidak valid",
+            details: { fieldErrors: { terms_accepted: ["Kamu perlu menyetujui Syarat Layanan dan Kebijakan Privasi"] } },
+          },
+        },
+        400,
+      ),
+    );
+    const error = await errorOf(gateway.register(rani));
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({ terms_accepted: true });
+    expect(error).toMatchObject({ field: "terms" });
   });
 });
 
