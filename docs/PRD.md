@@ -141,11 +141,12 @@ supaya ringkasan bulanan tetap akurat.
 
 **Kriteria penerimaan**
 
-- [ ] Setiap baris transaksi punya aksi **Ubah** dan **Hapus**.
-- [ ] Hapus meminta konfirmasi sebelum dijalankan.
-- [ ] Setelah diubah atau dihapus, dashboard ikut ter-update.
+- [x] Setiap baris transaksi punya aksi **Ubah** dan **Hapus**: mengetuk baris membuka sheet "Ubah transaksi" (`/transactions/edit?id=...`) yang berisi tombol Hapus transaksi.
+- [x] Hapus meminta konfirmasi sebelum dijalankan.
+- [x] Setelah diubah atau dihapus, dashboard ikut ter-update.
+- [x] Tabel desktop punya aksi massal untuk transaksi yang dicentang: Ubah kategori, Pindah akun, dan Hapus (`API-CONTRACT.md` bagian 4.11).
 
-**Prioritas:** P1 · **Status boilerplate:** Belum
+**Prioritas:** P1 · **Status:** Selesai
 
 #### A4. Filter dan pencarian transaksi
 

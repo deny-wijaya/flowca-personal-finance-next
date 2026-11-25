@@ -3,7 +3,7 @@ import { ValidationError } from "@/shared/domain/errors";
 import { defaultCategoryIdFor } from "../domain/category";
 import type { NewTransaction, Transaction } from "../domain/transaction";
 import { InMemoryCategoryRepository } from "./in-memory-category-repository";
-import type { DateRange, TransactionFilter, TransactionRepository, TransactionTotals } from "../domain/transaction-repository";
+import type { BulkChanges, DateRange, TransactionFilter, TransactionRepository, TransactionTotals } from "../domain/transaction-repository";
 
 /**
  * Implementasi repository tanpa backend (dipakai saat DATA_SOURCE=mock dan di unit test).
@@ -66,6 +66,46 @@ export class InMemoryTransactionRepository implements TransactionRepository {
       delta.set(trx.accountId, (delta.get(trx.accountId) ?? 0) + signed);
     }
     return delta;
+  }
+
+  async findById(id: string): Promise<Transaction | null> {
+    return this.transactions.find((trx) => trx.id === id) ?? null;
+  }
+
+  async update(id: string, input: NewTransaction): Promise<Transaction> {
+    const index = this.transactions.findIndex((trx) => trx.id === id);
+    const category = this.categories.find(input.categoryId);
+    if (index < 0 || !category) throw new ValidationError("Transaksi atau kategori tidak ditemukan", "categoryId");
+    const updated: Transaction = { ...input, category: category.name, id };
+    this.transactions[index] = updated;
+    return updated;
+  }
+
+  async bulkDelete(ids: string[]): Promise<number> {
+    const unique = new Set(ids);
+    if (this.transactions.filter((trx) => unique.has(trx.id)).length !== unique.size) {
+      throw new ValidationError("Sebagian transaksi tidak ditemukan. Tidak ada yang diubah.", "form");
+    }
+    this.transactions = this.transactions.filter((trx) => !unique.has(trx.id));
+    return unique.size;
+  }
+
+  async bulkUpdate(ids: string[], changes: BulkChanges): Promise<number> {
+    const unique = new Set(ids);
+    const targets = this.transactions.filter((trx) => unique.has(trx.id));
+    if (targets.length !== unique.size) throw new ValidationError("Sebagian transaksi tidak ditemukan. Tidak ada yang diubah.", "form");
+    const category = changes.categoryId ? this.categories.find(changes.categoryId) : undefined;
+    if (changes.categoryId && (!category || targets.some((trx) => trx.type !== category.type))) {
+      throw new ValidationError("Kategori tidak cocok dengan jenis transaksi yang dipilih.", "form");
+    }
+    this.transactions = this.transactions.map((trx) =>
+      unique.has(trx.id) ? { ...trx, ...changes, category: category?.name ?? trx.category } : trx,
+    );
+    return unique.size;
+  }
+
+  async delete(id: string): Promise<void> {
+    this.transactions = this.transactions.filter((trx) => trx.id !== id);
   }
 
   async create(input: NewTransaction): Promise<Transaction> {

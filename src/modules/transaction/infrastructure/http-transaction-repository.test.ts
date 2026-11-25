@@ -172,3 +172,95 @@ describe("HttpTransactionRepository", () => {
     expect(error).toMatchObject({ status: 0, code: "NETWORK_ERROR" });
   });
 });
+
+describe("HttpTransactionRepository ubah dan hapus", () => {
+  const dto = {
+    id: "trx_9",
+    type: "expense",
+    amount: 70_000,
+    category_id: "cat_expense_transportasi",
+    category: "Transportasi",
+    note: "Gojek",
+    account_id: "acc_1",
+    occurred_at: "2026-11-06T02:00:00.000Z",
+  };
+
+  it("findById memanggil GET /transactions/:id, dan 404 menjadi null", async () => {
+    const { repo } = setup(async (input) =>
+      String(input).endsWith("trx_9") ? jsonResponse({ data: dto }) : jsonResponse({ error: { code: "NOT_FOUND", message: "Data Tidak ditemukan" } }, 404),
+    );
+    expect(await repo.findById("trx_9")).toMatchObject({ id: "trx_9", amount: 70_000, accountId: "acc_1" });
+    expect(await repo.findById("trx_milik_orang_lain")).toBeNull();
+  });
+
+  it("update mengirim PATCH dengan semua field dalam snake_case", async () => {
+    const { fetchMock, repo } = setup(async () => jsonResponse({ data: dto }));
+
+    await repo.update("trx_9", {
+      type: "expense",
+      amount: 70_000,
+      categoryId: "cat_expense_transportasi",
+      accountId: "acc_1",
+      note: "Gojek",
+      occurredAt: new Date("2026-11-06T02:00:00.000Z"),
+    });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("https://api.example.test/api/v1/transactions/trx_9");
+    expect(init?.method).toBe("PATCH");
+    expect(JSON.parse(String(init?.body))).toEqual({
+      type: "expense",
+      amount: 70_000,
+      category_id: "cat_expense_transportasi",
+      note: "Gojek",
+      account_id: "acc_1",
+      occurred_at: "2026-11-06T02:00:00.000Z",
+    });
+  });
+
+  it("delete mengirim DELETE dan menerima 204 tanpa body", async () => {
+    const { fetchMock, repo } = setup(async () => new Response(null, { status: 204 }));
+    await expect(repo.delete("trx_9")).resolves.toBeUndefined();
+    expect(fetchMock.mock.calls[0][1]?.method).toBe("DELETE");
+  });
+});
+
+describe("HttpTransactionRepository aksi massal", () => {
+  it("bulkDelete mengirim { ids } dan mengembalikan jumlah yang dihapus", async () => {
+    const { fetchMock, repo } = setup(async () => jsonResponse({ data: { deleted: 2 } }));
+    expect(await repo.bulkDelete(["trx_1", "trx_2"])).toBe(2);
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe("https://api.example.test/api/v1/transactions/bulk-delete");
+    expect(JSON.parse(String(init?.body))).toEqual({ ids: ["trx_1", "trx_2"] });
+  });
+
+  it("bulkUpdate mengirim changes dalam snake_case", async () => {
+    const { fetchMock, repo } = setup(async () => jsonResponse({ data: { updated: 2 } }));
+    expect(await repo.bulkUpdate(["trx_1", "trx_2"], { accountId: "acc_1" })).toBe(2);
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ ids: ["trx_1", "trx_2"], changes: { account_id: "acc_1" } });
+  });
+
+  it("404 dan 400 menjadi ValidationError dengan pesan dari backend", async () => {
+    const { repo } = setup(async () =>
+      jsonResponse({ error: { code: "NOT_FOUND", message: "Sebagian transaksi tidak ditemukan. Tidak ada yang diubah." } }, 404),
+    );
+    await expect(repo.bulkDelete(["trx_1"])).rejects.toMatchObject({ name: "ValidationError", message: "Sebagian transaksi tidak ditemukan. Tidak ada yang diubah." });
+
+    vi.unstubAllGlobals();
+    const { repo: repo2 } = setup(async () =>
+      jsonResponse(
+        {
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Data request tidak valid",
+            details: { fieldErrors: { category_id: ["Kategori Belanja tidak bisa dipakai untuk pemasukan"] } },
+          },
+        },
+        400,
+      ),
+    );
+    await expect(repo2.bulkUpdate(["trx_1"], { categoryId: "cat_expense_belanja" })).rejects.toMatchObject({
+      message: "Kategori Belanja tidak bisa dipakai untuk pemasukan",
+    });
+  });
+});

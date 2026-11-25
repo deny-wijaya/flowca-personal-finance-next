@@ -41,4 +41,16 @@ export interface TransactionRepository {
   list(filter: TransactionFilter, page: PageRequest): Promise<Page<Transaction>>;
   summarize(range: DateRange): Promise<TransactionTotals>;
   create(input: NewTransaction): Promise<Transaction>;
+  /** null kalau transaksi tidak ada atau milik user lain. */
+  findById(id: string): Promise<Transaction | null>;
+  /** Mengganti isi transaksi dengan `input` (semua field dikirim). */
+  update(id: string, input: NewTransaction): Promise<Transaction>;
+  delete(id: string): Promise<void>;
+  /** Menghapus semua `ids` sekaligus: berhasil semua atau tidak ada yang terhapus. Mengembalikan jumlahnya. */
+  bulkDelete(ids: string[]): Promise<number>;
+  /** Mengganti kategori dan/atau akun semua `ids` sekaligus, dengan aturan berhasil semua atau tidak sama sekali. */
+  bulkUpdate(ids: string[], changes: BulkChanges): Promise<number>;
 }
+
+/** Perubahan untuk aksi massal "Ubah kategori" dan "Pindah akun" di tabel Transaksi. */
+export type BulkChanges = { categoryId?: string; accountId?: string };
